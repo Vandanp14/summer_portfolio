@@ -1,0 +1,127 @@
+/* Projects — editorial numbered list, divider-separated rows, no boxes */
+
+.projects-list {
+  border-top: 1px solid var(--border-subtle);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.projects-row {
+  align-items: baseline;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  column-gap: 32px;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  padding: 40px 16px;
+  transition: background-color 140ms ease-out;
+}
+
+.projects-row:hover {
+  background: var(--surface-hover);
+}
+
+.projects-index {
+  color: var(--text-3);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.projects-content {
+  min-width: 0;
+}
+
+.projects-title-row {
+  color: var(--text-1);
+  font-size: clamp(1.5rem, 2.4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.projects-summary {
+  color: var(--text-2);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 14px 0 0;
+  max-width: 44rem;
+}
+
+.projects-stack {
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 550;
+  letter-spacing: 0.005em;
+  margin: 20px 0 0;
+}
+
+.projects-impact {
+  color: var(--text-3);
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.5;
+  margin: 10px 0 0;
+}
+
+.projects-stat {
+  color: var(--text-1);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.projects-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.projects-link {
+  align-items: center;
+  border-radius: 6px;
+  color: var(--text-2);
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 8px;
+  min-height: 44px;
+  text-decoration: none;
+  transition: color 140ms ease-out;
+}
+
+.projects-link:hover {
+  color: var(--accent);
+}
+
+.projects-link__glyph {
+  transition: transform 140ms ease-out;
+}
+
+.projects-link:hover .projects-link__glyph {
+  transform: translateX(3px);
+}
+
+@media (max-width: 640px) {
+  .projects-row {
+    column-gap: 0;
+    grid-template-columns: 1fr;
+    padding: 32px 8px;
+    row-gap: 8px;
+  }
+
+  .projects-summary {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-link:hover .projects-link__glyph {
+    transform: none;
+  }
+}

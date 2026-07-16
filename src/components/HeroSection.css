@@ -1,0 +1,165 @@
+/* Hero — Editorial Premium, typography-dominant, single column */
+
+/* Top clearance comes from .app-main + .content-section:first-child (foundation). */
+.hero {
+  padding-bottom: 40px;
+}
+
+.hero__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Eyebrow with sage status dot */
+.hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  flex: none;
+}
+
+/* Name — dominant display headline */
+.hero__name {
+  margin: 22px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 9vw, 6.5rem);
+  font-weight: 550;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--text-1);
+}
+
+/* Supporting title line */
+.hero__title {
+  margin: 20px 0 0;
+  max-width: 34rem;
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* Secondary paragraph */
+.hero__description {
+  margin: 18px 0 0;
+  max-width: 40rem;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+/* Actions */
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+/* Single plain metadata line */
+.hero__meta {
+  margin: 26px 0 0;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+/* Stat strip — borderless on canvas, top + bottom hairlines */
+.hero__stats {
+  width: 100%;
+  margin: 56px 0 0;
+  padding: 28px 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.hero__stat {
+  padding: 4px 24px;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.hero__stat:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.hero__stat-value {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero__stat-label {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+/* Tablet — headline clamps down; stats become 2x2 with hairline row divider */
+@media (max-width: 960px) {
+  .hero__stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+
+  .hero__stat {
+    padding: 22px 24px;
+    border-left: none;
+  }
+
+  .hero__stat:first-child {
+    padding-left: 24px;
+  }
+
+  .hero__stat:nth-child(odd) {
+    padding-left: 0;
+  }
+
+  .hero__stat:nth-child(even) {
+    border-left: 1px solid var(--border-subtle);
+  }
+
+  .hero__stat:nth-child(n + 3) {
+    border-top: 1px solid var(--border-subtle);
+  }
+}
+
+/* Phone — tighten, keep 2x2, actions wrap */
+@media (max-width: 640px) {
+  .hero__actions {
+    gap: 10px;
+  }
+
+  .hero__actions .button {
+    flex: 1 1 auto;
+  }
+
+  .hero__stat {
+    padding: 18px 16px;
+  }
+
+  .hero__stat:nth-child(odd) {
+    padding-left: 0;
+  }
+
+  .hero__stat:nth-child(even) {
+    padding-right: 0;
+  }
+}

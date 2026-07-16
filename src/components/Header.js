@@ -9,8 +9,7 @@ function Header({
     <header className="site-header">
       <div className="site-header__inner">
         <a className="site-brand" href="#home" onClick={onNavigate}>
-          <span className="site-brand__mark">VP</span>
-          <span className="site-brand__text">Vandan Patel</span>
+          Vandan Patel
         </a>
 
         <button

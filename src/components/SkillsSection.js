@@ -1,21 +1,21 @@
+import './SkillsSection.css';
+
 function SkillsSection({ skills }) {
   return (
-    <section className="content-section" id="skills">
+    <section className="content-section skills" id="skills" aria-labelledby="skills-title">
       <div className="section-heading">
-        <p className="section-heading__eyebrow">Skills</p>
-        <h2>Tools and concepts I reach for when shipping software.</h2>
+        <p className="eyebrow">Skills</p>
+        <h2 className="section-title" id="skills-title">
+          Tools and concepts I reach for when shipping software.
+        </h2>
       </div>
 
-      <div className="skills-grid">
+      <div className="skills-list">
         {skills.map((skillGroup) => (
-          <article className="glass-panel skill-card" key={skillGroup.title}>
-            <p className="skill-card__label">{skillGroup.title}</p>
-            <ul>
-              {skillGroup.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
+          <div className="skills-row" key={skillGroup.title}>
+            <p className="skills-row__label">{skillGroup.title}</p>
+            <p className="skills-row__items">{skillGroup.items.join(' · ')}</p>
+          </div>
         ))}
       </div>
     </section>

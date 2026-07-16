@@ -1,0 +1,140 @@
+/* Experience — one editorial list inside a single matte card, divided by rules. */
+
+.xp-list {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  list-style: none;
+  margin: 0;
+  padding: 8px 32px;
+}
+
+.xp-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 40px;
+  padding: 36px 0;
+}
+
+.xp-row + .xp-row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Left column — period + location */
+.xp-row__aside {
+  padding-top: 2px;
+}
+
+.xp-period {
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.xp-location {
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
+  margin: 6px 0 0;
+}
+
+/* Right column — role detail */
+.xp-row__main {
+  min-width: 0;
+}
+
+.xp-tag {
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+.xp-title {
+  color: var(--text-1);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.xp-org {
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 550;
+  margin: 4px 0 0;
+}
+
+.xp-summary {
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 16px 0 0;
+}
+
+.xp-highlights {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.xp-highlight {
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  padding-left: 20px;
+  position: relative;
+}
+
+.xp-highlight + .xp-highlight {
+  margin-top: 8px;
+}
+
+.xp-highlight::before {
+  background: var(--accent);
+  border-radius: 1px;
+  content: '';
+  height: 3px;
+  left: 2px;
+  position: absolute;
+  top: 9px;
+  width: 3px;
+}
+
+@media (max-width: 960px) {
+  .xp-list {
+    padding: 4px 24px;
+  }
+
+  .xp-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 32px 0;
+  }
+
+  .xp-row__aside {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding-top: 0;
+  }
+
+  .xp-location {
+    margin: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .xp-list {
+    padding: 4px 20px;
+  }
+
+  .xp-row {
+    padding: 28px 0;
+  }
+}

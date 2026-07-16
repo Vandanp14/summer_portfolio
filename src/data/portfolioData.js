@@ -6,8 +6,6 @@ export const profile = {
   heroHighlights: ['SUNY Oswego CS', 'Graduating Dec 2026', 'Full-stack + systems projects'],
   heroDescription:
     'I like building products that feel clear, fast, and genuinely helpful. From dashboards and automation tools to systems-heavy coursework, I care about software that solves real problems without feeling overdesigned.',
-  currentFocus:
-    'Growing as a full-stack engineer through React, backend APIs, and systems projects while staying grounded in usability and practical impact.',
   aboutTitle: 'I care about software that is useful first, polished second, and thoughtful all the way through.',
   aboutParagraphs: [
     'I am a computer science student at SUNY Oswego, and a lot of the work that motivates me starts with one simple question: how can this be made easier for real people to use? That mindset has pushed me toward dashboard work, automation projects, and engineering decisions that reduce friction instead of adding it.',
@@ -144,30 +142,22 @@ export const skills = [
 export const contactLinks = [
   {
     label: 'Email',
-    value: 'patelvandan024@gmail.com',
     href: 'mailto:patelvandan024@gmail.com',
     external: false,
-    featured: true,
   },
   {
     label: 'GitHub',
-    value: 'github.com/Vandanp14',
     href: 'https://github.com/Vandanp14',
     external: true,
-    featured: true,
   },
   {
     label: 'LinkedIn',
-    value: 'linkedin.com/in/vpatel1410',
     href: 'https://linkedin.com/in/vpatel1410',
     external: true,
-    featured: true,
   },
   {
     label: 'Website',
-    value: 'vandanpatel.me',
     href: 'https://vandanpatel.me',
     external: true,
-    featured: false,
   },
 ];

@@ -60,11 +60,91 @@ function App() {
     };
   }, []);
 
+  // Scroll reveal — fade sections up the first time they enter view.
+  useEffect(() => {
+    const revealTargets = Array.from(
+      document.querySelectorAll('.content-section')
+    ).filter((element) => element.id !== 'home');
+
+    const prefersReducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (typeof IntersectionObserver === 'undefined' || prefersReducedMotion) {
+      revealTargets.forEach((element) => element.classList.add('is-revealed'));
+      return undefined;
+    }
+
+    const revealObserver = new IntersectionObserver(
+      (entries, observerInstance) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            observerInstance.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    revealTargets.forEach((element) => revealObserver.observe(element));
+
+    return () => {
+      revealObserver.disconnect();
+    };
+  }, []);
+
+  // Background parallax — barely-there warm washes drifting on scroll.
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      return undefined;
+    }
+
+    const sage = document.querySelector('.app-bg--sage');
+    const champagne = document.querySelector('.app-bg--champagne');
+
+    if (!sage && !champagne) {
+      return undefined;
+    }
+
+    let frameId = null;
+
+    const applyParallax = () => {
+      frameId = null;
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      if (sage) {
+        sage.style.transform = `translate3d(0, ${scrollY * -0.06}px, 0)`;
+      }
+      if (champagne) {
+        champagne.style.transform = `translate3d(0, ${scrollY * 0.04}px, 0)`;
+      }
+    };
+
+    const handleScroll = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(applyParallax);
+      }
+    };
+
+    applyParallax();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
+
   return (
     <div className="app-shell">
-      <div className="app-shell__aurora app-shell__aurora--primary" />
-      <div className="app-shell__aurora app-shell__aurora--secondary" />
-      <div className="app-shell__grid" aria-hidden="true" />
+      <div aria-hidden="true" className="app-bg app-bg--sage" />
+      <div aria-hidden="true" className="app-bg app-bg--champagne" />
 
       <Header
         activeSection={activeSection}
@@ -75,10 +155,7 @@ function App() {
       />
 
       <main className="app-main">
-        <HeroSection
-          contactLinks={contactLinks}
-          profile={profile}
-        />
+        <HeroSection profile={profile} />
         <AboutSection profile={profile} />
         <ExperienceSection experience={experience} />
         <ProjectsSection projects={projects} />

@@ -1,42 +1,82 @@
+import './ProjectsSection.css';
+
+// Emphasize numeric tokens (e.g. "7,000+", "50%", "15") inside an impact line.
+// Capturing group keeps the matched stat tokens in the split output.
+const STAT_PATTERN = /(\d[\d,]*(?:\.\d+)?[%+]?)/g;
+
+function renderImpact(impact) {
+  return impact
+    .split(STAT_PATTERN)
+    .filter((part) => part !== '')
+    .map((part, index) =>
+      /\d/.test(part) ? (
+        <span className="projects-stat" key={`${part}-${index}`}>
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+}
+
 function ProjectsSection({ projects }) {
   const featuredProjects = projects.filter((project) => project.featured);
 
   return (
-    <section aria-label="Featured projects" className="content-section" id="projects">
+    <section aria-labelledby="projects-title" className="content-section projects" id="projects">
       <div className="section-heading">
-        <p className="section-heading__eyebrow">Projects</p>
-        <h2>Featured builds with technical depth and clear outcomes.</h2>
+        <p className="eyebrow">Selected work</p>
+        <h2 className="section-title" id="projects-title">
+          Projects
+        </h2>
       </div>
 
-      <div className="project-grid">
-        {featuredProjects.map((project) => (
-          <article className="glass-panel project-card" key={project.title}>
-            <div className="project-card__header">
-              <p className="project-card__eyebrow">{project.impact}</p>
-              <h3>{project.title}</h3>
-            </div>
+      <ol className="projects-list">
+        {featuredProjects.map((project, index) => (
+          <li className="projects-row" key={project.title}>
+            <span className="projects-index" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
 
-            <p className="project-card__summary">{project.summary}</p>
+            <div className="projects-content">
+              <h3 className="projects-title-row">{project.title}</h3>
+              <p className="projects-summary">{project.summary}</p>
 
-            <ul className="project-card__stack">
-              {project.stack.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+              <p className="projects-stack">{project.stack.join(' · ')}</p>
 
-            <div className="project-card__links">
-              <a href={project.repoUrl} target="_blank" rel="noreferrer">
-                View Code
-              </a>
-              {project.liveUrl ? (
-                <a href={project.liveUrl} target="_blank" rel="noreferrer">
-                  Live Demo
+              <p className="projects-impact">{renderImpact(project.impact)}</p>
+
+              <div className="projects-links">
+                <a
+                  className="projects-link"
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View code
+                  <span className="projects-link__glyph" aria-hidden="true">
+                    →
+                  </span>
                 </a>
-              ) : null}
+
+                {project.liveUrl ? (
+                  <a
+                    className="projects-link"
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Live demo
+                    <span className="projects-link__glyph" aria-hidden="true">
+                      →
+                    </span>
+                  </a>
+                ) : null}
+              </div>
             </div>
-          </article>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   );
 }

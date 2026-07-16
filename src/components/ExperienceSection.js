@@ -1,35 +1,40 @@
+import './ExperienceSection.css';
+
 function ExperienceSection({ experience }) {
   return (
-    <section className="content-section" id="experience">
+    <section className="content-section xp" id="experience" aria-labelledby="xp-title">
       <div className="section-heading">
-        <p className="section-heading__eyebrow">Experience</p>
-        <h2>Impact across dashboards, data systems, and developer workflows.</h2>
+        <p className="eyebrow">Where I've worked</p>
+        <h2 className="section-title" id="xp-title">
+          Impact across dashboards, data systems, and developer workflows.
+        </h2>
       </div>
 
-      <div className="timeline">
+      <ol className="xp-list">
         {experience.map((role) => (
-          <article className="glass-panel timeline-card" key={`${role.organization}-${role.title}`}>
-            <div className="timeline-card__meta">
-              <div>
-                <p className="timeline-card__eyebrow">{role.eyebrow}</p>
-                <h3>{role.title}</h3>
-                <p className="timeline-card__company">
-                  {role.organization} <span>{role.location}</span>
-                </p>
-              </div>
-              <p className="timeline-card__period">{role.period}</p>
+          <li className="xp-row" key={`${role.organization}-${role.title}`}>
+            <div className="xp-row__aside">
+              <p className="xp-period">{role.period}</p>
+              <p className="xp-location">{role.location}</p>
             </div>
 
-            <p className="timeline-card__summary">{role.summary}</p>
+            <div className="xp-row__main">
+              <p className="eyebrow xp-tag">{role.eyebrow}</p>
+              <h3 className="xp-title">{role.title}</h3>
+              <p className="xp-org">{role.organization}</p>
+              <p className="xp-summary">{role.summary}</p>
 
-            <ul className="timeline-card__highlights">
-              {role.highlights.map((highlight) => (
-                <li key={highlight}>{highlight}</li>
-              ))}
-            </ul>
-          </article>
+              <ul className="xp-highlights">
+                {role.highlights.map((highlight) => (
+                  <li className="xp-highlight" key={highlight}>
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   );
 }
