@@ -6,6 +6,14 @@ function HeroSection({ profile }) {
   return (
     <section className="content-section hero" id="home" aria-labelledby="hero-name">
       <div className="hero__inner">
+        <div className="hero__avatar" aria-hidden="true">
+          {profile.avatar ? (
+            <img src={profile.avatar} alt="" className="hero__avatar-img" />
+          ) : (
+            <span className="hero__avatar-initials">{profile.avatarInitials}</span>
+          )}
+        </div>
+
         <p className="eyebrow hero__eyebrow">
           <span className="hero__dot" aria-hidden="true" />
           {profile.heroBadge}

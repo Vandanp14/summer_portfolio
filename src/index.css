@@ -2,8 +2,45 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Duration scale */
+  --t-micro:     120ms;
+  --t-instant:   100ms;
+  --t-fast:      180ms;
+  --t-base:      250ms;
+  --t-medium:    450ms;
+  --t-slow:      600ms;
+  --t-story:     800ms;
+  --t-cinematic: 900ms;
+
+  /* Named easing curves */
+  --ease-standard:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:        cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart:  cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-luxe:       cubic-bezier(0.2, 1, 0.2, 1);
+  --ease-apple:      cubic-bezier(0.28, 0.11, 0.32, 1);
+  --ease-in-out:     cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-productive: cubic-bezier(0.2, 0, 0.38, 0.9);
+
+  /* Distance scale */
+  --d-micro:  2px;
+  --d-hover:  4px;
+  --d-rise:   16px;
+  --d-reveal: 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 html {
-  background: #F4F1EA;
+  background: #F5F5F7;
   color-scheme: light;
   scroll-behavior: smooth;
 }

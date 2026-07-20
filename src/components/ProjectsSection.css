@@ -15,7 +15,7 @@
   display: grid;
   grid-template-columns: 64px 1fr;
   padding: 40px 16px;
-  transition: background-color 140ms ease-out;
+  transition: background-color var(--t-fast) var(--ease-standard);
 }
 
 .projects-row:hover {
@@ -92,7 +92,7 @@
   gap: 8px;
   min-height: 44px;
   text-decoration: none;
-  transition: color 140ms ease-out;
+  transition: color var(--t-fast) var(--ease-standard);
 }
 
 .projects-link:hover {
@@ -100,11 +100,38 @@
 }
 
 .projects-link__glyph {
-  transition: transform 140ms ease-out;
+  transition: transform var(--t-fast) var(--ease-standard);
 }
 
 .projects-link:hover .projects-link__glyph {
   transform: translateX(3px);
+}
+
+.projects-visual {
+  display: none;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-control);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+@media (min-width: 960px) {
+  .projects-row {
+    grid-template-columns: 64px 1fr 72px;
+  }
+
+  .projects-visual {
+    display: flex;
+    align-self: start;
+    margin-top: 4px;
+  }
 }
 
 @media (max-width: 640px) {

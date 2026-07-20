@@ -1,9 +1,32 @@
-/* Hero — Editorial Premium, typography-dominant, single column */
-
-/* Top clearance comes from .app-main + .content-section:first-child (foundation). */
-.hero {
-  padding-bottom: 40px;
+.hero__avatar,
+.hero__eyebrow,
+.hero__name,
+.hero__title,
+.hero__description,
+.hero__actions,
+.hero__meta,
+.hero__stats {
+  opacity: 0;
+  transform: translateY(var(--d-rise));
+  animation: reveal var(--t-base) var(--ease-out) forwards;
 }
+
+.hero__avatar,
+.hero__eyebrow { animation-delay: 0ms; }
+.hero__name { animation-delay: 80ms; }
+.hero__title { animation-delay: 160ms; }
+.hero__description { animation-delay: 240ms; }
+.hero__actions,
+.hero__meta,
+.hero__stats { animation-delay: 320ms; }
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 .hero__inner {
   display: flex;
@@ -12,6 +35,34 @@
 }
 
 /* Eyebrow with sage status dot */
+.hero__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: none;
+}
+
+.hero__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero__avatar-initials {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
 .hero__eyebrow {
   display: inline-flex;
   align-items: center;

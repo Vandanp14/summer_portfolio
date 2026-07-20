@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import './App.css';
 import AboutSection from './components/AboutSection';
 import ContactSection from './components/ContactSection';
@@ -14,6 +14,8 @@ import {
   projects,
   skills,
 } from './data/portfolioData';
+
+const Background3D = lazy(() => import('./components/Background3D'));
 
 const navigationSections = [
   { id: 'home', label: 'Home' },
@@ -57,6 +59,41 @@ function App() {
 
     return () => {
       observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    let frameId = null;
+
+    const updateScrollProgress = () => {
+      frameId = null;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = maxScroll > 0
+        ? Math.min(1, Math.max(0, window.scrollY / maxScroll))
+        : 0;
+      const track = document.querySelector('.dragon-progress__track');
+      const width = track ? track.clientWidth : 0;
+
+      document.documentElement.style.setProperty('--scroll-progress', `${progress}`);
+      document.documentElement.style.setProperty('--dragon-progress-x', `${progress * width}px`);
+    };
+
+    const handleScrollProgress = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(updateScrollProgress);
+      }
+    };
+
+    updateScrollProgress();
+    window.addEventListener('scroll', handleScrollProgress, { passive: true });
+    window.addEventListener('resize', updateScrollProgress);
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollProgress);
+      window.removeEventListener('resize', updateScrollProgress);
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
     };
   }, []);
 
@@ -104,10 +141,9 @@ function App() {
       return undefined;
     }
 
-    const sage = document.querySelector('.app-bg--sage');
-    const champagne = document.querySelector('.app-bg--champagne');
+    const dragonPoster = document.querySelector('.app-dragon-poster');
 
-    if (!sage && !champagne) {
+    if (!dragonPoster) {
       return undefined;
     }
 
@@ -116,11 +152,17 @@ function App() {
     const applyParallax = () => {
       frameId = null;
       const scrollY = window.scrollY || window.pageYOffset || 0;
-      if (sage) {
-        sage.style.transform = `translate3d(0, ${scrollY * -0.06}px, 0)`;
-      }
-      if (champagne) {
-        champagne.style.transform = `translate3d(0, ${scrollY * 0.04}px, 0)`;
+      if (dragonPoster) {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? Math.min(1, Math.max(0, scrollY / maxScroll)) : 0;
+        const reveal = Math.min(1, progress * 2.4);
+        const exit = Math.max(0, (progress - 0.68) * 3.2);
+        const opacity = Math.max(0.24, reveal * (1 - exit));
+        const y = -18 + progress * 54;
+        const scale = 0.96 + reveal * 0.08 - exit * 0.12;
+        const rotate = -2 + progress * 5;
+        dragonPoster.style.opacity = `${opacity}`;
+        dragonPoster.style.transform = `translate3d(0, ${y}px, 0) scale(${scale}) rotate(${rotate}deg)`;
       }
     };
 
@@ -143,8 +185,16 @@ function App() {
 
   return (
     <div className="app-shell">
-      <div aria-hidden="true" className="app-bg app-bg--sage" />
-      <div aria-hidden="true" className="app-bg app-bg--champagne" />
+      <img
+        aria-hidden="true"
+        className="app-dragon-poster"
+        src={`${process.env.PUBLIC_URL}/light-fury-portfolio.svg`}
+        alt=""
+      />
+
+      <Suspense fallback={null}>
+        <Background3D />
+      </Suspense>
 
       <Header
         activeSection={activeSection}

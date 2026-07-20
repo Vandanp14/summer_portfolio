@@ -1,5 +1,7 @@
 export const profile = {
   name: 'Vandan Patel',
+  avatar: null,
+  avatarInitials: 'VP',
   title: 'Computer science student building clean, useful software with a thoughtful engineering mindset.',
   heroBadge: 'Incoming Software Engineering Intern at Fanatics Collectibles',
   heroLocation: 'Oswego, NY',
@@ -93,6 +95,7 @@ export const projects = [
     stack: ['React', 'Flask', 'MySQL', 'REST APIs'],
     impact: 'Live transit tooling for 7,000+ students',
     repoUrl: 'https://github.com/Vandanp14/Centro-Bus-Predictor',
+    visual: 'T',
     featured: true,
   },
   {
@@ -102,6 +105,7 @@ export const projects = [
     stack: ['C++17', 'POSIX', 'Concurrency', 'Sockets'],
     impact: 'Systems project centered on throughput and reliability',
     repoUrl: 'https://github.com/Vandanp14/Multi-Threaded-Web-Server',
+    visual: 'W',
     featured: true,
   },
   {
@@ -111,6 +115,7 @@ export const projects = [
     stack: ['Python', 'Regex', 'Bash', 'HTML'],
     impact: 'Reduced grading time from 3 hours to 15 minutes',
     repoUrl: 'https://github.com/Vandanp14/05-python-project-Vandanp14',
+    visual: 'G',
     featured: true,
   },
   {
@@ -120,6 +125,7 @@ export const projects = [
     stack: ['Python', 'Selenium', 'BeautifulSoup', 'SQL'],
     impact: 'Collected 250+ job postings per day',
     repoUrl: 'https://github.com/Vandanp14/Freeport-Job-Scraper',
+    visual: 'J',
     featured: true,
   },
 ];

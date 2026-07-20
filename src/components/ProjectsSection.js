@@ -39,6 +39,9 @@ function ProjectsSection({ projects }) {
             </span>
 
             <div className="projects-content">
+              <div className="projects-visual" aria-hidden="true">
+                {project.visual}
+              </div>
               <h3 className="projects-title-row">{project.title}</h3>
               <p className="projects-summary">{project.summary}</p>
 

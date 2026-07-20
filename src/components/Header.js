@@ -41,6 +41,12 @@ function Header({
           ))}
         </nav>
       </div>
+      <div className="dragon-progress" aria-hidden="true">
+        <div className="dragon-progress__track">
+          <span className="dragon-progress__bar" />
+          <span className="dragon-progress__marker" />
+        </div>
+      </div>
     </header>
   );
 }
