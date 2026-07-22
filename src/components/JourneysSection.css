@@ -1,0 +1,158 @@
+/* Journeys — full-bleed photo marquee. Editorial Premium, calm.
+   CSS-only infinite horizontal drift (duplicate-and-translate -50%),
+   pause on hover, edge-fade mask. Reduced-motion collapses to a static,
+   horizontally scrollable, snap row so all photos stay reachable. */
+
+.journeys {
+  --card-h: 340px;
+}
+
+/* Full-bleed break-out from the centered 1120px column to the viewport width.
+   Valid because .app-main is horizontally centered (margin: 0 auto). */
+.journeys__viewport {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.journeys__track {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  margin: 0;
+  padding: var(--space-tight) 0;
+  list-style: none;
+  animation: journeys-drift 32s linear infinite;
+  will-change: transform;
+}
+
+/* Pause the drift for pointer users hovering the strip. */
+.journeys__viewport:hover .journeys__track {
+  animation-play-state: paused;
+}
+
+/* -50% is seamless: the track is exactly two identical copies, and every
+   card carries a uniform right margin, so one copy's width == 50%. */
+@keyframes journeys-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.journeys__item {
+  position: relative;
+  flex: 0 0 auto;
+  height: var(--card-h);
+  margin-right: 20px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Broken-image fallback — the aspect-ratio (set inline from the image's
+   intrinsic width/height) preserves the footprint so the marquee never
+   collapses; a faint placeholder keeps the caption's place label. */
+.journeys__item--fallback {
+  width: auto;
+  background: var(--surface-faint);
+}
+
+.journeys__fallback {
+  height: 100%;
+  width: 100%;
+  background: var(--surface-faint);
+}
+
+/* Width follows the intrinsic aspect ratio; portrait cards read narrower.
+   Explicit width/height attrs on the <img> reserve the box → no CLS. */
+.journeys__img {
+  display: block;
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  transform: none;
+  transition: transform var(--t-medium) var(--ease-out);
+}
+
+/* Gentle image scale on hover — only when motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+  .journeys__item:hover .journeys__img {
+    transform: scale(1.03);
+  }
+}
+
+.journeys__caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 28px 16px 14px;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 10, 0.72),
+    rgba(10, 10, 10, 0.28) 45%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.journeys__tag {
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.journeys__place {
+  color: var(--text-1);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 640px) {
+  .journeys {
+    --card-h: 240px;
+  }
+
+  .journeys__item {
+    margin-right: 12px;
+  }
+}
+
+/* Reduced motion — kill the drift and the edge mask; expose a static,
+   horizontally scrollable, scroll-snapped row. Drop the duplicate copy
+   so nothing is announced or scrolled through twice. */
+@media (prefers-reduced-motion: reduce) {
+  .journeys__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-mask-image: none;
+            mask-image: none;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 24px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .journeys__track {
+    animation: none;
+    width: max-content;
+    padding: var(--space-tight) 24px;
+  }
+
+  .journeys__item {
+    scroll-snap-align: start;
+  }
+
+  .journeys__item[aria-hidden='true'] {
+    display: none;
+  }
+
+  .journeys__img {
+    transition: none;
+  }
+}

@@ -1,0 +1,57 @@
+/* Custom cursor — dot + trailing ring. Elements exist in the DOM always, but
+   are inert (pointer-events:none) and invisible until the JS marks the cursor
+   live. Native cursor is only hidden while html.cursor-drawn is set. */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10000;
+  border-radius: 50%;
+  opacity: 0;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+}
+
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  /* transition SIZE/COLOR only — never transform (would fight the rAF trail) */
+  transition: width 0.24s var(--ease-out), height 0.24s var(--ease-out),
+    background-color 0.24s var(--ease-out), border-color 0.24s var(--ease-out);
+}
+
+.cursor-ring.is-hover {
+  width: 58px;
+  height: 58px;
+  background: rgba(239, 68, 68, 0.16);
+  border-color: var(--accent);
+}
+
+/* Reveal only when the pointer is inside the window and the cursor is live. */
+html.cursor-visible .cursor-dot,
+html.cursor-visible .cursor-ring {
+  opacity: 1;
+}
+
+/* Hide the native cursor only while the drawn cursor is active + healthy. */
+html.cursor-drawn,
+html.cursor-drawn a,
+html.cursor-drawn button,
+html.cursor-drawn [data-cursor-hover] {
+  cursor: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring {
+    transition: none;
+  }
+}

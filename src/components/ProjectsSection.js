@@ -26,7 +26,7 @@ function ProjectsSection({ projects }) {
     <section aria-labelledby="projects-title" className="content-section projects" id="projects">
       <div className="section-heading">
         <p className="eyebrow">Selected work</p>
-        <h2 className="section-title" id="projects-title">
+        <h2 className="section-title kinetic-title" id="projects-title">
           Projects
         </h2>
       </div>
@@ -39,9 +39,6 @@ function ProjectsSection({ projects }) {
             </span>
 
             <div className="projects-content">
-              <div className="projects-visual" aria-hidden="true">
-                {project.visual}
-              </div>
               <h3 className="projects-title-row">{project.title}</h3>
               <p className="projects-summary">{project.summary}</p>
 

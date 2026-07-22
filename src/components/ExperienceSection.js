@@ -5,7 +5,7 @@ function ExperienceSection({ experience }) {
     <section className="content-section xp" id="experience" aria-labelledby="xp-title">
       <div className="section-heading">
         <p className="eyebrow">Where I've worked</p>
-        <h2 className="section-title" id="xp-title">
+        <h2 className="section-title kinetic-title" id="xp-title">
           Impact across dashboards, data systems, and developer workflows.
         </h2>
       </div>

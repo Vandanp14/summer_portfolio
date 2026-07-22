@@ -40,8 +40,8 @@
 }
 
 html {
-  background: #F5F5F7;
-  color-scheme: light;
+  background: var(--bg);
+  color-scheme: dark;
   scroll-behavior: smooth;
 }
 
@@ -71,4 +71,31 @@ img {
 
 #root {
   isolation: isolate;
+}
+
+/* Lenis smooth scroll — when active it drives scroll via rAF, so native
+   scroll-behavior must step aside to avoid double-smoothing on anchor jumps.
+   These classes are added by the Lenis instance itself. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Film-grain overlay — one static SVG feTurbulence tile, GPU-composited, no
+   network, no JS, no animation. Sits above every layer at a tiny opacity to
+   re-introduce analog texture and kill gradient banding on the dark canvas.
+   Static, so no reduced-motion branch is needed. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
 }

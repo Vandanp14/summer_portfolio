@@ -1,0 +1,65 @@
+/* Preloader — dark cover, oversized tabular counter, curtain lift upward.
+   Only present while active (React unmounts it at 'done'), so no reduced-motion
+   branch is needed here — the component skips entirely under reduced motion. */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--bg);
+  display: flex;
+  align-items: flex-end;
+  padding: 8vmin;
+  box-sizing: border-box;
+  will-change: transform;
+}
+
+.preloader--lift {
+  transform: translateY(-101%);
+  /* Curtain lift 0.5s (mirrors CURTAIN_MS in Preloader.js). With the ≤0.9s
+     opaque gate and the hero reveal firing at 60% of this lift, total intro
+     motion lands ≤1.4s. */
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.preloader__inner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  gap: 24px;
+}
+
+.preloader__label {
+  color: var(--text-eyebrow);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.preloader__count {
+  color: var(--text-1);
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 18vw, 13rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.preloader__count::after {
+  content: '%';
+  font-size: 0.32em;
+  font-weight: 400;
+  vertical-align: super;
+  margin-left: 0.1em;
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .preloader__inner {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 12px;
+  }
+}

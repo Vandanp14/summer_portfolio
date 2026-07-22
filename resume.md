@@ -1,9 +1,9 @@
 # Vandan Patel  
 Oswego, NY  
-📧 patelvandan024@gmail.com  
-🔗 [github.com/Vandanp14](https://github.com/Vandanp14)  
-🔗 [linkedin.com/in/vpatel1410](https://linkedin.com/in/vpatel1410)  
-🌐 [vandanpatel.me](https://vandanpatel.me)  
+patelvandan024@gmail.com  
+[github.com/Vandanp14](https://github.com/Vandanp14)  
+[linkedin.com/in/vpatel1410](https://linkedin.com/in/vpatel1410)  
+[vandanpatel.me](https://vandanpatel.me)  
 
 ---
 

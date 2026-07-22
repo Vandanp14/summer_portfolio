@@ -3,11 +3,13 @@ import './SkillsSection.css';
 function SkillsSection({ skills }) {
   return (
     <section className="content-section skills" id="skills" aria-labelledby="skills-title">
-      <div className="section-heading">
-        <p className="eyebrow">Skills</p>
-        <h2 className="section-title" id="skills-title">
-          Tools and concepts I reach for when shipping software.
+      <div className="skills-head">
+        <h2 className="section-title kinetic-title" id="skills-title">
+          Skills
         </h2>
+        <p className="skills-head__lede">
+          Tools and concepts I reach for when shipping software.
+        </p>
       </div>
 
       <div className="skills-list">

@@ -1,42 +1,55 @@
-/* Skills — one calm block, three divided rows */
+/* Skills — bare typographic inventory on the canvas. No card, no surface:
+   rows float, separated only by hairline rules. */
+
+.skills-head {
+  margin-bottom: 48px;
+}
+
+/* Short-label title leads; lede sits beneath it. */
+.skills-head .section-title {
+  margin: 0;
+}
+
+/* Demoted sentence — now the section lede beneath the "Skills" label. */
+.skills-head__lede {
+  margin: 20px 0 0;
+  font: var(--type-lede);
+  letter-spacing: 0;
+  color: var(--text-2);
+  max-width: 46ch;
+}
+
 .skills-list {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--rule);
 }
 
 .skills-row {
   align-items: baseline;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--rule);
   display: grid;
   gap: 40px;
   grid-template-columns: 220px 1fr;
-  padding: 26px 0;
+  padding: 28px 0;
 }
 
 .skills-row__label {
-  color: var(--text-3);
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.08em;
   margin: 0;
-  text-transform: uppercase;
+  font: var(--type-meta);
+  letter-spacing: 0.01em;
+  color: var(--text-3);
 }
 
 .skills-row__items {
   color: var(--text-2);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.5;
   margin: 0;
 }
 
 @media (max-width: 960px) {
   .skills-row {
-    gap: 8px;
+    gap: 10px;
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .skills-row {
-    padding: 22px 0;
+    padding: 24px 0;
   }
 }

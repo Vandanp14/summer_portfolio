@@ -5,7 +5,7 @@ function ContactSection({ profile, contactLinks }) {
     <section className="content-section contact" id="contact" aria-labelledby="contact-title">
       <div className="contact__inner">
         <p className="eyebrow contact__eyebrow">Contact</p>
-        <h2 className="contact__title" id="contact-title">
+        <h2 className="contact__title kinetic-title" id="contact-title">
           Let&apos;s build something useful.
         </h2>
         <p className="contact__blurb">{profile.contactBlurb}</p>

@@ -1,76 +1,164 @@
 <svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="sky" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(925 375) rotate(132) scale(980 710)">
-      <stop stop-color="#17122A" stop-opacity="0.95"/>
-      <stop offset="0.52" stop-color="#08080D" stop-opacity="0.9"/>
-      <stop offset="1" stop-color="#020203" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="ember" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1090 700) rotate(128) scale(520 300)">
-      <stop stop-color="#F59E0B" stop-opacity="0.22"/>
-      <stop offset="0.45" stop-color="#B45309" stop-opacity="0.08"/>
-      <stop offset="1" stop-color="#020203" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="body" x1="615" y1="383" x2="1060" y2="660" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1E1B2E"/>
-      <stop offset="0.45" stop-color="#08090D"/>
-      <stop offset="1" stop-color="#020203"/>
+    <linearGradient id="bodyGrad" x1="660" y1="300" x2="1240" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#191B20"/>
+      <stop offset="0.5" stop-color="#0C0D11"/>
+      <stop offset="1" stop-color="#050506"/>
     </linearGradient>
-    <linearGradient id="rim" x1="402" y1="188" x2="1210" y2="737" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6D5DF7" stop-opacity="0.26"/>
-      <stop offset="0.5" stop-color="#34254A" stop-opacity="0.14"/>
-      <stop offset="1" stop-color="#F59E0B" stop-opacity="0.18"/>
+    <linearGradient id="plateGrad" x1="600" y1="380" x2="1120" y2="740" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#20222A"/>
+      <stop offset="1" stop-color="#0D0E12"/>
     </linearGradient>
-    <filter id="softGlow" x="-35%" y="-35%" width="170%" height="170%" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="18" result="blur"/>
-      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.94 0 1 0 0 0.47 0 0 1 0 0.02 0 0 0 0.65 0"/>
-      <feBlend in="SourceGraphic"/>
+    <linearGradient id="earGrad" x1="1010" y1="480" x2="1340" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0C0D10"/>
+      <stop offset="0.6" stop-color="#08090B"/>
+      <stop offset="1" stop-color="#15151B"/>
+    </linearGradient>
+    <radialGradient id="irisGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(818 414) scale(140 140)">
+      <stop stop-color="#D2FBDF"/>
+      <stop offset="0.28" stop-color="#86EFAC"/>
+      <stop offset="0.56" stop-color="#4ADE80"/>
+      <stop offset="0.82" stop-color="#22C55E"/>
+      <stop offset="1" stop-color="#146C36"/>
+    </radialGradient>
+    <radialGradient id="eyeGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(852 452) scale(190 165)">
+      <stop stop-color="#4ADE80" stop-opacity="0.55"/>
+      <stop offset="0.4" stop-color="#4ADE80" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#4ADE80" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="warmAmbient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(980 440) scale(640 640)">
+      <stop stop-color="#F97316" stop-opacity="0.13"/>
+      <stop offset="0.42" stop-color="#DC2626" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#DC2626" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rimEmber" x1="640" y1="300" x2="1300" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE8BE" stop-opacity="0.5"/>
+      <stop offset="0.28" stop-color="#F97316" stop-opacity="0.55"/>
+      <stop offset="0.62" stop-color="#DC2626" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#DC2626" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="rimEar" x1="1000" y1="420" x2="1360" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DC2626" stop-opacity="0.12"/>
+      <stop offset="0.5" stop-color="#F97316" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FFE0B0" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="emberBlur" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="9"/>
     </filter>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#000000" flood-opacity="0.55"/>
+    <filter id="glowBlur" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="softBlur" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="depth" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="22" stdDeviation="30" flood-color="#000000" flood-opacity="0.5"/>
     </filter>
   </defs>
 
-  <rect width="1600" height="1000" fill="url(#sky)"/>
-  <rect width="1600" height="1000" fill="url(#ember)"/>
+  <!-- ambient warm haze + green eye halo (survive screen blend) -->
+  <rect width="1600" height="1000" fill="url(#warmAmbient)"/>
+  <ellipse cx="852" cy="452" rx="190" ry="165" fill="url(#eyeGlow)" filter="url(#glowBlur)"/>
 
-  <g opacity="0.7">
-    <circle cx="1112" cy="692" r="2.2" fill="#F59E0B" opacity="0.9"/>
-    <circle cx="1178" cy="618" r="1.6" fill="#F59E0B" opacity="0.65"/>
-    <circle cx="1045" cy="760" r="1.8" fill="#F59E0B" opacity="0.55"/>
-    <circle cx="1260" cy="736" r="1.4" fill="#F59E0B" opacity="0.5"/>
-    <circle cx="988" cy="626" r="1.2" fill="#F59E0B" opacity="0.45"/>
+  <!-- ===================== EAR PLATES (behind head) — 2 broad flaps + 2 nubs ===================== -->
+  <g filter="url(#depth)">
+    <path d="M1002 332C1058 296 1150 250 1244 206C1272 193 1288 210 1268 238C1214 300 1150 356 1096 396C1058 384 1024 362 1002 332Z" fill="url(#earGrad)"/>
+    <path d="M1064 400C1150 378 1258 366 1356 356C1384 353 1390 374 1364 392C1280 424 1188 452 1120 476C1098 452 1078 426 1064 400Z" fill="url(#earGrad)"/>
+    <path d="M1116 486C1180 480 1250 490 1310 514C1256 532 1186 534 1132 522C1122 510 1117 498 1116 486Z" fill="url(#earGrad)"/>
+    <path d="M958 312C986 280 1022 270 1046 286C1028 308 1000 324 976 334C968 328 962 320 958 312Z" fill="url(#earGrad)"/>
+    <!-- inner plate ridge highlights -->
+    <path d="M1040 330C1104 296 1176 262 1240 228C1188 288 1128 340 1082 376C1066 362 1052 348 1040 330Z" fill="#131318" opacity="0.8"/>
+    <path d="M1100 398C1176 376 1264 366 1338 360C1268 390 1190 420 1130 448C1118 432 1108 416 1100 398Z" fill="#131318" opacity="0.8"/>
   </g>
 
-  <g filter="url(#shadow)" opacity="0.96">
-    <path d="M781 510C646 438 502 356 244 383C406 289 553 260 705 305C779 327 831 370 861 414C906 373 966 343 1037 334C1167 318 1287 365 1407 457C1160 406 1017 445 897 516C862 536 819 532 781 510Z" fill="url(#body)"/>
-    <path d="M781 510C646 438 502 356 244 383C406 289 553 260 705 305C779 327 831 370 861 414C906 373 966 343 1037 334C1167 318 1287 365 1407 457C1160 406 1017 445 897 516C862 536 819 532 781 510Z" fill="url(#rim)"/>
-
-    <path d="M718 463C693 394 650 336 590 289C653 295 704 318 741 356C726 314 726 267 744 220C787 284 819 340 839 389C862 341 903 294 960 247C955 313 935 366 900 407C959 385 1029 382 1110 398C1034 441 965 470 903 485C857 497 775 502 718 463Z" fill="#050507"/>
-    <path d="M730 467C708 408 672 357 622 316C677 327 721 353 752 391C740 345 748 302 774 257C808 319 831 370 842 411C866 366 902 325 950 288C940 343 918 386 885 419C935 404 994 404 1062 419C998 450 942 472 894 483C846 494 778 497 730 467Z" fill="#0B0B10"/>
-
-    <path d="M818 405C788 369 752 339 706 315C744 360 769 402 779 443L818 405Z" fill="#030304"/>
-    <path d="M876 408C913 378 953 354 1000 337C954 374 922 410 904 445L876 408Z" fill="#030304"/>
-
-    <ellipse cx="835" cy="469" rx="145" ry="92" fill="#07080B"/>
-    <path d="M717 500C759 569 826 609 918 617C868 659 782 650 717 604C660 563 633 512 651 458C663 477 683 491 717 500Z" fill="#06070A"/>
-    <path d="M906 548C1014 574 1088 619 1152 703C1077 675 1000 648 890 632C899 609 906 582 906 548Z" fill="#06070A"/>
-    <path d="M1111 690C1153 668 1198 667 1246 692C1199 710 1155 710 1111 690Z" fill="#050507"/>
-    <path d="M1110 716C1150 724 1183 748 1207 790C1161 777 1127 753 1110 716Z" fill="#050507"/>
-
-    <g filter="url(#softGlow)">
-      <ellipse cx="781" cy="444" rx="19" ry="8" fill="#F59E0B"/>
-      <ellipse cx="887" cy="444" rx="19" ry="8" fill="#F59E0B"/>
-      <ellipse cx="782" cy="444" rx="8" ry="4" fill="#FFE8A3" opacity="0.95"/>
-      <ellipse cx="888" cy="444" rx="8" ry="4" fill="#FFE8A3" opacity="0.95"/>
-    </g>
-
-    <path d="M692 501C593 519 491 562 385 636C452 526 543 474 661 462L692 501Z" fill="#07070A" opacity="0.78"/>
-    <path d="M972 504C1083 539 1175 598 1250 688C1191 582 1106 514 999 477L972 504Z" fill="#07070A" opacity="0.78"/>
+  <!-- ===================== HEAD + NECK SILHOUETTE ===================== -->
+  <g filter="url(#depth)">
+    <path d="M560 556C566 508 610 466 690 440C772 414 830 372 892 314C928 283 974 300 1036 338C1094 373 1130 421 1152 498C1180 592 1212 674 1264 766C1302 832 1332 894 1354 954L1362 1000L900 1000C850 940 812 862 792 782C772 706 742 668 700 664C652 660 606 632 582 606C570 592 562 574 560 556Z" fill="url(#bodyGrad)"/>
   </g>
 
-  <g opacity="0.18">
-    <path d="M321 429C478 352 614 334 734 375" stroke="#8072FF" stroke-width="1"/>
-    <path d="M944 405C1086 356 1210 377 1336 459" stroke="#8072FF" stroke-width="1"/>
-    <path d="M696 559C766 632 856 662 959 647" stroke="#F59E0B" stroke-width="1"/>
+  <!-- ===================== PLATE / SCALE DETAILING ===================== -->
+  <g opacity="0.8">
+    <path d="M566 552C588 508 632 470 700 452C744 474 746 518 710 550C656 566 600 566 566 552Z" fill="url(#plateGrad)"/>
+    <path d="M918 504C992 496 1058 516 1108 556C1074 598 1006 608 940 596C922 568 914 536 918 504Z" fill="url(#plateGrad)" opacity="0.5"/>
+    <path d="M700 660C760 636 822 640 866 666C844 706 788 724 730 714C712 698 702 680 700 660Z" fill="url(#plateGrad)" opacity="0.8"/>
+    <path d="M1030 350C1088 380 1120 424 1140 486C1100 470 1058 456 1020 452C1010 418 1016 382 1030 350Z" fill="url(#plateGrad)" opacity="0.6"/>
+    <path d="M726 430C782 394 842 366 900 340C940 356 948 398 922 438C866 446 798 452 748 456C738 448 730 440 726 430Z" fill="url(#plateGrad)" opacity="0.55"/>
+  </g>
+  <g stroke="#050507" fill="none" stroke-linecap="round">
+    <path d="M566 540C620 502 668 482 704 478" stroke-width="2" opacity="0.5"/>
+    <path d="M748 452C812 418 862 400 906 398" stroke-width="2" opacity="0.4"/>
+    <path d="M934 540C994 548 1046 566 1092 596" stroke-width="2" opacity="0.35"/>
+    <path d="M986 636C1056 658 1114 700 1156 762" stroke-width="2" opacity="0.3"/>
+    <path d="M902 726C962 754 1012 798 1046 856" stroke-width="2" opacity="0.28"/>
+    <path d="M842 690C876 736 900 792 908 852" stroke-width="1.6" opacity="0.22"/>
+  </g>
+
+  <!-- ===================== MOUTH LINE (Toothless smile) ===================== -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M570 566C634 592 722 598 812 584C856 577 890 562 914 542" stroke="#050507" stroke-width="3.5" opacity="0.55"/>
+    <path d="M576 574C636 598 722 604 806 592" stroke="#F97316" stroke-width="1.6" opacity="0.16"/>
+  </g>
+
+  <!-- ===================== RIM LIGHT (carries silhouette under screen) ===================== -->
+  <g fill="none" stroke-linecap="round">
+    <!-- soft ember glow under the top/back rim -->
+    <path d="M560 556C566 508 610 466 690 440C772 414 830 372 892 314C928 283 974 300 1036 338C1094 373 1130 421 1152 498C1180 592 1212 674 1264 766C1302 832 1332 894 1354 954" stroke="url(#rimEmber)" stroke-width="10" opacity="0.6" filter="url(#emberBlur)"/>
+    <!-- crisp ember rim on top+back edge -->
+    <path d="M560 556C566 508 610 466 690 440C772 414 830 372 892 314C928 283 974 300 1036 338C1094 373 1130 421 1152 498C1180 592 1212 674 1264 766C1302 832 1332 894 1354 954" stroke="url(#rimEmber)" stroke-width="4.5"/>
+    <!-- hot warm-white highlight along forehead + nose bridge -->
+    <path d="M606 466C690 424 800 372 892 314C928 283 974 300 1030 336" stroke="#FFECC4" stroke-width="2.4" opacity="0.7"/>
+    <!-- front snout glint -->
+    <path d="M560 556C566 528 586 500 620 480" stroke="#FFE0B0" stroke-width="2.2" opacity="0.5"/>
+    <!-- ear plate rim glow + crisp edges -->
+    <path d="M1006 330C1060 296 1150 250 1244 208" stroke="url(#rimEar)" stroke-width="7" opacity="0.5" filter="url(#emberBlur)"/>
+    <path d="M1006 330C1060 296 1150 250 1244 208" stroke="url(#rimEar)" stroke-width="3.2"/>
+    <path d="M1066 398C1150 378 1258 366 1354 358" stroke="url(#rimEar)" stroke-width="7" opacity="0.4" filter="url(#emberBlur)"/>
+    <path d="M1066 398C1150 378 1258 366 1354 358" stroke="url(#rimEar)" stroke-width="2.8"/>
+    <path d="M1118 488C1180 482 1250 492 1308 514" stroke="url(#rimEar)" stroke-width="2" opacity="0.7"/>
+    <!-- warm rim along the jaw / throat so the face reads under screen -->
+    <path d="M560 556C558 590 598 628 700 668C744 672 774 710 794 786" stroke="#DC2626" stroke-width="3" opacity="0.38"/>
+  </g>
+
+  <!-- faint ember glow blobs along the rim -->
+  <g filter="url(#emberBlur)" opacity="0.5">
+    <ellipse cx="900" cy="316" rx="34" ry="16" fill="#F97316" opacity="0.35"/>
+    <ellipse cx="1150" cy="520" rx="26" ry="30" fill="#DC2626" opacity="0.3"/>
+    <ellipse cx="596" cy="474" rx="24" ry="18" fill="#F97316" opacity="0.28"/>
+  </g>
+
+  <!-- ===================== EYE ===================== -->
+  <g>
+    <!-- brow shadow / heavy hooded upper lid -->
+    <path d="M736 476C756 408 834 362 904 380C936 388 958 412 962 446C930 410 868 396 812 414C776 425 754 450 744 476C741 476 738 476 736 476Z" fill="#050507" opacity="0.92"/>
+    <!-- eye opening filled with acid-green iris -->
+    <path d="M762 470C782 408 840 370 894 384C928 393 948 421 944 458C940 498 898 530 844 532C800 533 764 508 762 470Z" fill="url(#irisGrad)"/>
+    <!-- inner shading toward back of eye -->
+    <path d="M900 402C930 416 948 436 944 460C940 496 902 528 850 530C902 512 930 470 918 430C912 416 906 408 900 402Z" fill="#15803D" opacity="0.5"/>
+    <!-- back-of-eye rim shadow for volume -->
+    <path d="M934 424C946 442 946 470 932 496" fill="none" stroke="#0C5227" stroke-width="7" opacity="0.4" stroke-linecap="round"/>
+    <!-- soft light-green reflection along the lower front rim -->
+    <path d="M788 508C826 528 892 526 936 492" stroke="#BBF7D0" stroke-width="4" opacity="0.4" fill="none" stroke-linecap="round"/>
+    <!-- vertical slit pupil -->
+    <path d="M850 386C863 404 868 430 868 454C868 478 863 504 850 522C837 504 832 478 832 454C832 430 837 404 850 386Z" fill="#04120A"/>
+    <!-- glossy catch-lights -->
+    <ellipse cx="820" cy="418" rx="15" ry="19" transform="rotate(-22 820 418)" fill="#F2FFF6" opacity="0.95"/>
+    <ellipse cx="874" cy="492" rx="7" ry="8" fill="#EAFBF0" opacity="0.8"/>
+    <circle cx="806" cy="446" r="2.6" fill="#FFFFFF" opacity="0.85"/>
+    <!-- luminous green edge on the eye opening -->
+    <path d="M762 470C782 408 840 370 894 384C928 393 948 421 944 458C940 498 898 530 844 532C800 533 764 508 762 470Z" fill="none" stroke="#86EFAC" stroke-width="2.4" opacity="0.55"/>
+    <!-- dark upper-lid line -->
+    <path d="M764 468C784 410 842 372 896 386C924 394 944 420 942 452" fill="none" stroke="#04120A" stroke-width="5" opacity="0.7" stroke-linecap="round"/>
+  </g>
+
+  <!-- ===================== NOSTRIL + EMBER SPARKS ===================== -->
+  <path d="M584 540C596 533 614 535 624 545C615 555 598 555 584 548C581 545 581 543 584 540Z" fill="#050507"/>
+  <circle cx="608" cy="544" r="4" fill="#F97316" opacity="0.55" filter="url(#softBlur)"/>
+  <g filter="url(#softBlur)">
+    <circle cx="516" cy="546" r="3" fill="#F97316" opacity="0.7"/>
+    <circle cx="540" cy="600" r="2.2" fill="#FB923C" opacity="0.6"/>
+    <circle cx="566" cy="510" r="2.4" fill="#F97316" opacity="0.55"/>
+    <circle cx="620" cy="640" r="2" fill="#DC2626" opacity="0.5"/>
+    <circle cx="1004" cy="300" r="2.2" fill="#F97316" opacity="0.5"/>
+    <circle cx="1188" cy="636" r="2.2" fill="#DC2626" opacity="0.45"/>
   </g>
 </svg>

@@ -5,10 +5,10 @@ function AboutSection({ profile }) {
     <section className="content-section about" id="about" aria-labelledby="about-title">
       <div className="about-grid">
         <div className="about-lede">
-          <p className="eyebrow">About</p>
-          <h2 className="about-statement" id="about-title">
-            {profile.aboutTitle}
+          <h2 className="section-title kinetic-title" id="about-title">
+            About
           </h2>
+          <p className="about-lede__statement">{profile.aboutTitle}</p>
         </div>
 
         <div className="about-body">

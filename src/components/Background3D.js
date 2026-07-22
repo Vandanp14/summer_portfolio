@@ -1,83 +1,9 @@
 import { useEffect, useRef } from 'react';
 
-const NOISE = `
-vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
-vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
-vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
-vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-float snoise(vec3 v){const vec2 C=vec2(1.0/6.0,1.0/3.0);const vec4 D=vec4(0.0,0.5,1.0,2.0);
- vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
- vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.0-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);
- vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;i=mod289(i);
- vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
- float n_=0.142857142857;vec3 ns=n_*D.wyz-D.xzx;vec4 j=p-49.0*floor(p*ns.z*ns.z);
- vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.0*x_);vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;
- vec4 h=1.0-abs(x)-abs(y);vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);
- vec4 s0=floor(b0)*2.0+1.0;vec4 s1=floor(b1)*2.0+1.0;vec4 sh=-step(h,vec4(0.0));
- vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
- vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
- vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
- p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
- vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);m=m*m;
- return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}`;
-
-const VERTEX_BODY = NOISE + `
-  uniform float uTime, uAmp, uScroll;
-  varying float vN; varying vec3 vNormal; varying float vHeight;
-  void main(){
-    vec3 pos = position;
-    pos.y *= 1.6;
-    pos.z *= 1.2;
-    float freq = 1.4 + uScroll * 0.3;
-    float d = snoise(pos * freq + uTime * 0.2);
-    d += 0.5 * snoise(pos * 3.0 - uTime * 0.12);
-    vec3 p = pos + normalize(pos) * d * uAmp;
-    vN = d; vHeight = length(pos);
-    vNormal = normalize(normalMatrix * normalize(pos));
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-  }`;
-
-const FRAG_BODY = `
-  precision highp float;
-  varying float vN; varying vec3 vNormal; varying float vHeight;
-  uniform float uScroll;
-  void main(){
-    float fresnel = pow(1.0 - abs(vNormal.z), 3.5);
-    float noisePat = sin(vN * 25.0 + vHeight * 8.0) * 0.5 + 0.5;
-    vec3 base = vec3(0.92, 0.94, 0.96);
-    vec3 scaleHi = vec3(0.85, 0.88, 0.92);
-    vec3 rimLo = vec3(0.6, 0.75, 0.9);
-    vec3 rimHi = vec3(0.3, 0.55, 0.85);
-    vec3 col = mix(base, scaleHi, noisePat * 0.2);
-    float rimMix = fresnel * (0.3 + uScroll * 0.7);
-    col = mix(col, rimLo, rimMix * 0.4);
-    col = mix(col, rimHi, max(0.0, rimMix - 0.5) * 0.5);
-    float plasma = max(0.0, -vNormal.y) * 0.08 * (0.3 + uScroll * 0.7);
-    col += vec3(0.05, 0.65, 0.95) * plasma;
-    gl_FragColor = vec4(col, 0.6 + uScroll * 0.3);
-  }`;
-
-const VERTEX_WING = NOISE + `
-  uniform float uTime, uWingAmp;
-  varying float vDist;
-  void main(){
-    float dist = length(position);
-    float flutter = snoise(vec3(position.x * 2.0, position.y * 2.0 + uTime * 0.3, position.z * 2.0)) * 0.02 * uWingAmp;
-    vec3 p = position + normal * flutter;
-    vDist = dist;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-  }`;
-
-const FRAG_WING = `
-  precision highp float;
-  varying float vDist;
-  uniform float uScroll;
-  void main(){
-    float alpha = smoothstep(1.6, 0.2, vDist) * 0.2 * (0.5 + uScroll * 0.5);
-    vec3 col = mix(vec3(0.85, 0.88, 0.92), vec3(0.6, 0.75, 0.9), vDist * 0.3);
-    gl_FragColor = vec4(col, alpha);
-  }`;
-
+// Capability gate — refuse 3D on reduced-motion, data-saver, slow radios,
+// low memory / core counts, no-WebGL, and software (SwiftShader/llvmpipe)
+// renderers. jsdom (tests) hits the reduced-motion branch and bails, so the
+// scene never initializes under Jest. Kept verbatim from the prior scene.
 function canRun3D() {
   if (typeof window === 'undefined') return false;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
@@ -97,23 +23,331 @@ function canRun3D() {
   return true;
 }
 
-function createWingShape(THREE) {
+// ── Scene tuning ─────────────────────────────────────────────────────────
+// Dragon lives in the right third of the frame so the left-aligned hero text
+// column (max-width 1120px, ≤56ch) stays clear. Camera looks slightly left of
+// the model, keeping the model near the lens axis (undistorted) while it reads
+// on the right of the frame.
+const DRAGON = {
+  targetSize: 3.5,   // world units for the largest bind-pose dimension (body length)
+  baseX: 2.75,       // world x — pushes the dragon into the clear right third
+  baseY: -0.45,      // world y — seats the head below the hero headline / right column
+  baseRotY: -0.62,   // yaw — 3/4 flying view: wide-eyed face + ear flaps toward camera
+  baseRotX: 0.02,    // slight nose-down tilt
+};
+const NARROW = { baseX: 1.0, baseY: 1.05, scale: 0.7, look: 0.2 }; // portrait / small
+const WIDE = { baseX: DRAGON.baseX, baseY: DRAGON.baseY, scale: 1, look: 0.55 };
+
+// ── Dragon choreography contract (design-brief "A Night Flight") ────────────
+// Keyed to page scroll progress s (0 = top … 1 = bottom), matching App.js's
+// --scroll-progress. Full presence → banked exit → not-rendered dead zone →
+// re-entry glide → composed perched landing in Contact's right half.
+//
+// The brief's nominal s-values (exit≈0.28, return≈0.82/0.95) assume Contact
+// spans [0.82,1.0]. Measured on the SHIPPED tree the Journeys tunnel pin
+// (`+=220%`) shifts the back half: About ends s≈0.19, the tunnel is PINNED
+// across s≈0.70–0.89, and Contact only fills the viewport across s≈0.91–1.0.
+// The contract is therefore re-projected onto real section geometry so it keeps
+// its INTENT exactly — dragon gone by the end of About, absent through the whole
+// pinned tunnel, and landing in Contact (never over the gallery).
+const CHOREO = {
+  presenceEnd: 0.11, //  [0, 0.11]      full hero presence, idle flap (hero ends ≈0.106)
+  fadeEnd: 0.19, //      opacity reaches 0 by the end of About (About ends ≈0.188)
+  exitEnd: 0.2, //       geometry fully off-canvas; dead zone begins (Experience start)
+  exitEndMobile: 0.2, // ≤640: exit finishes here, no return
+  returnStart: 0.9, //   [0.90, 1.0]    re-entry from upper-right (after unpin ≈0.89)
+  landBy: 0.975, //      settled into the perched landing pose by here
+};
+const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+const smooth01 = (v) => {
+  const t = clamp01(v);
+  return t * t * (3 - 2 * t);
+};
+
+// ── Hand-built Night Fury (Toothless) — parametric three.js geometry ────────
+// The old CC0 Quaternius dragon had a generic horse/lizard snout that never read
+// as Toothless. This builds an anime-faithful Night Fury from primitives: a wide
+// flat cranium + blunt snout, two big paddle ear-flaps + small nubs, huge acid-
+// green slit eyes, a sleek panther body + tail as one tapered tube, large bat
+// wings, and twin tail fins with ONE RED (the iconic prosthetic). Shaded with
+// MeshToonMaterial + a 3-step gradient ramp for a cel-shaded anime look.
+
+// 3-step toon ramp (dark → mid → near-full). NearestFilter = hard cel bands.
+// The dark band is a charcoal (not void) so the jet-black body separates from
+// the near-black hero background instead of vanishing into it.
+function makeToonGradient(THREE) {
+  const data = new Uint8Array([0x54, 0xa6, 0xff]);
+  const g = new THREE.DataTexture(data, data.length, 1, THREE.RedFormat);
+  g.minFilter = THREE.NearestFilter;
+  g.magFilter = THREE.NearestFilter;
+  g.generateMipmaps = false;
+  g.needsUpdate = true;
+  return g;
+}
+
+// Generalized cylinder: a tube swept along a curve with a per-t radius — gives
+// the sleek tapered body+tail as a single smooth mesh (three.TubeGeometry can't
+// taper). Mirrors TubeGeometry's Frenet-frame construction.
+function taperedTube(THREE, curve, radiusFn, tubularSegments, radialSegments) {
+  const frames = curve.computeFrenetFrames(tubularSegments, false);
+  const P = new THREE.Vector3();
+  const pos = [], nor = [], idx = [];
+  for (let i = 0; i <= tubularSegments; i++) {
+    const t = i / tubularSegments;
+    curve.getPointAt(t, P);
+    const N = frames.normals[i], B = frames.binormals[i];
+    const r = radiusFn(t);
+    for (let j = 0; j <= radialSegments; j++) {
+      const v = (j / radialSegments) * Math.PI * 2;
+      const s = Math.sin(v), c = -Math.cos(v);
+      const nx = c * N.x + s * B.x, ny = c * N.y + s * B.y, nz = c * N.z + s * B.z;
+      pos.push(P.x + r * nx, P.y + r * ny, P.z + r * nz);
+      nor.push(nx, ny, nz);
+    }
+  }
+  for (let i = 1; i <= tubularSegments; i++) {
+    for (let j = 1; j <= radialSegments; j++) {
+      const a = (radialSegments + 1) * (i - 1) + (j - 1);
+      const b = (radialSegments + 1) * i + (j - 1);
+      const c = (radialSegments + 1) * i + j;
+      const d = (radialSegments + 1) * (i - 1) + j;
+      idx.push(a, b, d, b, c, d);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setIndex(idx);
+  return g;
+}
+
+// linear-interpolated radius profile from [t, r] keypoints
+function profileFn(keys) {
+  return (t) => {
+    for (let i = 1; i < keys.length; i++) {
+      if (t <= keys[i][0]) {
+        const [t0, r0] = keys[i - 1], [t1, r1] = keys[i];
+        const k = (t - t0) / (t1 - t0 || 1);
+        return r0 + (r1 - r0) * k;
+      }
+    }
+    return keys[keys.length - 1][1];
+  };
+}
+
+function ellipsoid(THREE, rx, ry, rz, seg = 20) {
+  const g = new THREE.SphereGeometry(1, seg, Math.max(12, seg - 4));
+  g.scale(rx, ry, rz);
+  return g;
+}
+
+// paddle / leaf outline for the big ear-flaps — wide rounded root → soft point
+function paddleShape(THREE, len, wid) {
   const s = new THREE.Shape();
-  s.moveTo(-0.1, 0);
-  s.quadraticCurveTo(0.4, 0.6, 1.5, 0.9);
-  s.quadraticCurveTo(2.2, 0.7, 2.4, 0.2);
-  s.quadraticCurveTo(2.0, -0.1, 1.2, -0.15);
-  s.quadraticCurveTo(0.5, -0.15, -0.1, 0);
+  s.moveTo(0, -wid * 0.5);
+  s.quadraticCurveTo(len * 0.30, -wid * 0.62, len * 0.62, -wid * 0.30);
+  s.quadraticCurveTo(len * 0.92, -wid * 0.10, len, 0);
+  s.quadraticCurveTo(len * 0.92, wid * 0.10, len * 0.62, wid * 0.30);
+  s.quadraticCurveTo(len * 0.30, wid * 0.62, 0, wid * 0.5);
+  s.quadraticCurveTo(-wid * 0.18, 0, 0, -wid * 0.5);
   return s;
 }
 
-function createTailFinShape(THREE) {
+// bat-wing membrane silhouette (flat, in XY): shoulder at origin, tip out +X,
+// scalloped 3-web trailing edge sweeping back to the body root.
+function wingShape(THREE) {
+  const s = new THREE.Shape();
+  s.moveTo(0.0, 0.15);
+  s.quadraticCurveTo(1.15, 0.55, 2.35, 0.62);
+  s.quadraticCurveTo(3.05, 0.66, 3.35, 0.30);   // wingtip
+  s.quadraticCurveTo(3.05, 0.18, 2.55, -0.05);
+  s.quadraticCurveTo(2.80, -0.28, 2.35, -0.42);  // web 1
+  s.quadraticCurveTo(2.00, -0.20, 1.65, -0.35);
+  s.quadraticCurveTo(1.85, -0.66, 1.35, -0.72);  // web 2
+  s.quadraticCurveTo(1.00, -0.42, 0.70, -0.52);
+  s.quadraticCurveTo(0.80, -0.86, 0.35, -0.80);  // web 3
+  s.quadraticCurveTo(0.10, -0.45, 0.0, 0.15);
+  return s;
+}
+
+// tail fin — shark/paddle fin used twice at the tail tip (one black, one red)
+function finShape(THREE) {
   const s = new THREE.Shape();
   s.moveTo(0, 0);
-  s.quadraticCurveTo(0.3, 0.5, 0.8, 0.7);
-  s.quadraticCurveTo(1.2, 0.4, 0.9, 0);
-  s.quadraticCurveTo(0.6, 0.05, 0, 0);
+  s.quadraticCurveTo(0.10, 0.55, 0.55, 0.86);
+  s.quadraticCurveTo(0.66, 0.90, 0.74, 0.80);
+  s.quadraticCurveTo(0.52, 0.50, 0.60, 0.12);
+  s.quadraticCurveTo(0.40, 0.16, 0.0, 0.0);
   return s;
+}
+
+// Assembles the dragon. Returns the root Group plus handles for animation
+// (wings + head) and the shared { materials, geometries, gradient } for disposal.
+function buildToothless(THREE, gradientMap) {
+  const geos = [];      // every geometry created, disposed once on teardown
+  const track = (g) => { geos.push(g); return g; };
+
+  const M = {};
+  M.body = new THREE.MeshToonMaterial({ color: 0x0B0C0E, gradientMap });
+  M.body.emissive = new THREE.Color(0x140606); M.body.emissiveIntensity = 0.10;
+  // Wings read BLACK (Toothless wings are black) — only a whisper of crimson
+  // inner glow so the ember rim catches a warm edge, never a red fin.
+  M.membrane = new THREE.MeshToonMaterial({ color: 0x0A0A0C, gradientMap });
+  M.membrane.emissive = new THREE.Color(0x7E1212); M.membrane.emissiveIntensity = 0.09;
+  M.membrane.side = THREE.DoubleSide;
+  M.finRed = new THREE.MeshToonMaterial({ color: 0xC01B1B, gradientMap });
+  M.finRed.emissive = new THREE.Color(0xDC2626); M.finRed.emissiveIntensity = 0.5;
+  M.finRed.side = THREE.DoubleSide;
+  M.eye = new THREE.MeshStandardMaterial({ color: 0x0A2012, roughness: 0.25, metalness: 0.0 });
+  M.eye.emissive = new THREE.Color(0x4ADE80); M.eye.emissiveIntensity = 2.2;
+  M.pupil = new THREE.MeshBasicMaterial({ color: 0x030705 });
+
+  const root = new THREE.Group();
+  const add = (geo, mat, x, y, z, rx, ry, rz, sx, sy, sz) => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x || 0, y || 0, z || 0);
+    m.rotation.set(rx || 0, ry || 0, rz || 0);
+    if (sx !== undefined) m.scale.set(sx, sy, sz);
+    return m;
+  };
+
+  // ── BODY + TAIL: one sleek tapered tube along the spine (front +Z, tail -Z) ──
+  const spine = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0.52, 1.30),   // neck base (head sits ahead of this)
+    new THREE.Vector3(0, 0.34, 0.66),   // chest
+    new THREE.Vector3(0, 0.14, -0.05),  // mid-belly
+    new THREE.Vector3(0, 0.06, -0.72),  // hip
+    new THREE.Vector3(0, 0.02, -1.45),  // tail start
+    new THREE.Vector3(0, -0.04, -2.15),
+    new THREE.Vector3(0, -0.02, -2.85),
+    new THREE.Vector3(0, 0.10, -3.55),  // tail tip (lifts slightly)
+  ], false, 'catmullrom', 0.5);
+  const radius = profileFn([
+    [0.00, 0.30], [0.10, 0.52], [0.22, 0.62], [0.34, 0.60],
+    [0.50, 0.46], [0.66, 0.30], [0.80, 0.18], [0.92, 0.09], [1.00, 0.02],
+  ]);
+  root.add(new THREE.Mesh(track(taperedTube(THREE, spine, radius, 60, 16)), M.body));
+
+  // ── HEAD group (wide flat cranium + blunt snout), seated at the neck front ──
+  const head = new THREE.Group();
+  head.position.set(0, 0.62, 1.72);
+  head.rotation.set(0.06, 0, 0);
+  head.add(add(track(ellipsoid(THREE, 0.62, 0.46, 0.56)), M.body, 0, 0.02, -0.05));  // cranium: wide, flat
+  head.add(add(track(ellipsoid(THREE, 0.44, 0.34, 0.40)), M.body, 0, -0.09, 0.42));  // blunt snout (not a lizard nose)
+  head.add(add(track(ellipsoid(THREE, 0.30, 0.24, 0.22)), M.body, 0, -0.11, 0.70));  // rounded nose cap
+  head.add(add(track(ellipsoid(THREE, 0.50, 0.26, 0.44)), M.body, 0, -0.22, 0.18));  // jaw / cheeks
+  head.add(add(track(ellipsoid(THREE, 0.24, 0.12, 0.20)), M.body, 0.30, 0.20, 0.30));  // brow ridge R
+  head.add(add(track(ellipsoid(THREE, 0.24, 0.12, 0.20)), M.body, -0.30, 0.20, 0.30)); // brow ridge L
+
+  // ── EYES: huge acid-green orbs with vertical slit pupils, wide-set ──
+  const eyeGeo = track(ellipsoid(THREE, 0.235, 0.275, 0.20, 18));
+  const pupilGeo = track(ellipsoid(THREE, 0.055, 0.20, 0.06, 12));
+  const eyeAt = (sx) => {
+    const eg = new THREE.Group();
+    eg.position.set(0.335 * sx, 0.10, 0.40);
+    eg.rotation.set(0.06, 0.30 * sx, 0);   // gaze slightly forward-down (expressive)
+    eg.add(new THREE.Mesh(eyeGeo, M.eye));
+    eg.add(add(pupilGeo, M.pupil, 0, 0, 0.17));
+    return eg;
+  };
+  head.add(eyeAt(1)); head.add(eyeAt(-1));
+
+  // ── EAR FLAPS: 2 big broad paddles splayed up-out-back into a clear V ──
+  const flapGeo = track(new THREE.ExtrudeGeometry(paddleShape(THREE, 0.86, 0.74), {
+    depth: 0.05, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 1, steps: 1,
+  }));
+  const bigFlap = (sx) => {
+    const fg = new THREE.Group();
+    fg.position.set(0.30 * sx, 0.30, -0.14);
+    fg.rotation.set(-0.5, 0.62 * sx, 1.05 * sx); // up, splay out (V), lean back
+    fg.add(new THREE.Mesh(flapGeo, M.body));
+    return fg;
+  };
+  head.add(bigFlap(1)); head.add(bigFlap(-1));
+
+  // ── SMALL ear nubs (4) — flattened little cones near the flap bases ──
+  const nubGeo = track(new THREE.ConeGeometry(0.10, 0.34, 8)); nubGeo.scale(1, 1, 0.5);
+  const smallNub = (sx, x, y, z, tilt) => add(nubGeo, M.body, x, y, z, -0.7, 0, tilt * sx);
+  head.add(smallNub(1, 0.16, 0.30, -0.32, 0.7));
+  head.add(smallNub(-1, -0.16, 0.30, -0.32, 0.7));
+  head.add(smallNub(1, 0.36, 0.14, -0.30, 1.1));
+  head.add(smallNub(-1, -0.36, 0.14, -0.30, 1.1));
+  root.add(head);
+
+  // ── DORSAL nubs: row of soft nubs along the neck → back → tail ridge ──
+  const dorsalGeo = track(new THREE.ConeGeometry(0.07, 0.16, 6));
+  const P = new THREE.Vector3(), T = new THREE.Vector3();
+  for (let i = 0; i <= 18; i++) {
+    const t = 0.06 + (i / 18) * 0.9;
+    spine.getPointAt(t, P);
+    spine.getTangentAt(t, T);
+    const nub = new THREE.Mesh(dorsalGeo, M.body);
+    nub.scale.setScalar(Math.max(0.35, 1 - t * 0.7));
+    nub.position.set(P.x, P.y + radius(t) * 0.96, P.z);
+    nub.rotation.x = Math.atan2(T.y, T.z) - 0.15;
+    root.add(nub);
+  }
+
+  // ── WINGS: large bat wings — extruded membrane + fanned finger struts ──
+  const wingMembrane = track(new THREE.ExtrudeGeometry(wingShape(THREE), {
+    depth: 0.04, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 1, steps: 1,
+  }));
+  const strutGeo = track(new THREE.CapsuleGeometry(0.045, 1.0, 4, 8));
+  const fingerTips = [[3.35, 0.30], [2.35, -0.42], [1.35, -0.72], [0.35, -0.80]];
+  const buildWing = () => {
+    const wg = new THREE.Group();
+    wg.add(new THREE.Mesh(wingMembrane, M.membrane));
+    [[0, 0.15], ...fingerTips].forEach(([tx, ty]) => {
+      const len = Math.hypot(tx, ty) || 0.3;
+      const st = new THREE.Mesh(strutGeo, M.body);
+      st.scale.y = len;
+      st.position.set(tx / 2, ty / 2, 0.03);
+      st.rotation.z = Math.atan2(ty, tx) - Math.PI / 2;
+      wg.add(st);
+    });
+    return wg;
+  };
+  const wingR = buildWing();
+  const wingL = buildWing();
+  wingR.position.set(0.20, 0.58, -0.02);   // shoulders high on the mid-back
+  wingL.position.set(-0.20, 0.58, -0.02);
+  wingL.scale.x = -1;                        // mirror
+  const wingYaw = 0.72, wingPitch = 0.20;
+  const wingBaseZ = 0.38;                    // upswept at rest; flap animates around this
+  wingR.rotation.set(wingPitch, -wingYaw, wingBaseZ);
+  wingL.rotation.set(wingPitch, wingYaw, -wingBaseZ);
+  root.add(wingR); root.add(wingL);
+
+  // ── LEGS: 4 short tucked limbs so the belly doesn't float ──
+  const thighGeo = track(new THREE.CapsuleGeometry(0.13, 0.28, 4, 8));
+  const shinGeo = track(new THREE.CapsuleGeometry(0.09, 0.22, 4, 8));
+  const footGeo = track(ellipsoid(THREE, 0.13, 0.08, 0.18, 10));
+  const leg = (sx, z, big) => {
+    const lg = new THREE.Group();
+    const s = big ? 1 : 0.82;
+    lg.add(add(thighGeo, M.body, 0, -0.14 * s, 0, 0.5, 0, 0.3 * sx, s, s, s));
+    lg.add(add(shinGeo, M.body, 0.10 * sx, -0.32 * s, 0.10, -0.4, 0, 0.2 * sx, s, s, s));
+    lg.add(add(footGeo, M.body, 0.14 * sx, -0.42 * s, 0.22, 0, 0, 0, s, s, s));
+    lg.position.set(0.24 * sx, -0.02, z);
+    return lg;
+  };
+  root.add(leg(1, 0.30, false), leg(-1, 0.30, false), leg(1, -0.55, true), leg(-1, -0.55, true));
+
+  // ── TAIL FINS: twin fins at the tip — ONE RED (prosthetic), ONE BLACK ──
+  spine.getPointAt(0.985, P);
+  const finGeo = track(new THREE.ExtrudeGeometry(finShape(THREE), {
+    depth: 0.035, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.02, bevelSegments: 1, steps: 1,
+  }));
+  const fs = 1.55;
+  const finRed = new THREE.Mesh(finGeo, M.finRed);
+  finRed.position.set(P.x, P.y + 0.02, P.z + 0.04);
+  finRed.scale.set(fs, fs, fs); finRed.rotation.set(0.35, 0, 0.30);
+  const finBlack = new THREE.Mesh(finGeo, M.body);
+  finBlack.position.set(P.x, P.y + 0.02, P.z + 0.04);
+  finBlack.scale.set(fs, -fs, fs); finBlack.rotation.set(-0.35, 0, -0.30);
+  root.add(finRed, finBlack);
+
+  return { root, wingL, wingR, wingBaseZ, head, materials: M, geometries: geos };
 }
 
 function Background3D() {
@@ -122,155 +356,107 @@ function Background3D() {
   useEffect(() => {
     if (!canRun3D()) return;
 
+    let cancelled = false;
     let dispose = () => {};
     let timeoutId;
 
     timeoutId = setTimeout(async () => {
       try {
         const THREE = await import('three');
+        if (cancelled) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        // ── Renderer (unchanged config: alpha, low-power, DPR≤2, clear α0) ──
         const renderer = new THREE.WebGLRenderer({
           canvas, antialias: true, alpha: true, powerPreference: 'low-power',
         });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setClearColor(0x000000, 0);
         renderer.toneMapping = THREE.ACESFilmicToneMapping ?? 3;
-        renderer.toneMappingExposure = 1.0;
+        renderer.toneMappingExposure = 1.12;
+        renderer.shadowMap.enabled = false; // no shadow maps — perf
+        // Partial disposer in case the component unmounts mid-build.
+        dispose = () => renderer.dispose();
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-        camera.position.set(0, 0.6, 5);
+        camera.position.set(0, 0.5, 6.2);
+
+        // ── Lighting (4 lights) — low warm ambient + ember rim + warm fill + near-fill ─
+        // The ember-orange key from behind-above gives the Night-Fury fire rim;
+        // the warm fill from front-left keeps the near side off pure black. The
+        // toon gradient ramp quantizes all of it into clean cel bands.
+        const hemi = new THREE.HemisphereLight(0x2E2622, 0x060506, 0.42); // ~ambient
+        scene.add(hemi);
+        const key = new THREE.DirectionalLight(0xF9682E, 2.9); // ember-fire rim
+        key.position.set(-2.6, 4.2, -4.6);
+        scene.add(key);
+        const fill = new THREE.DirectionalLight(0xFFEAD8, 0.5); // warm-neutral fill
+        fill.position.set(-4.6, 1.1, 4.4);
+        scene.add(fill);
+        // Near-fill from the camera side (front-right-above) — catches the near
+        // cheek/snout/ear-flap edges so the jet-black head silhouette reads
+        // against the dark hero instead of disappearing. 4th light (≤4 cap).
+        const nearFill = new THREE.DirectionalLight(0xFFF1E2, 0.85);
+        nearFill.position.set(4.2, 2.6, 5.0);
+        scene.add(nearFill);
+
+        // ── Build the hand-made Night Fury (Toothless) ──
+        const gradient = makeToonGradient(THREE);
+        const built = buildToothless(THREE, gradient);
+        const model = built.root;
+
+        // ── Normalize scale + recenter, then seat in a positionable wrapper. ──
+        model.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const norm = DRAGON.targetSize / maxDim;
+        model.scale.setScalar(norm);
+        model.position.copy(center).multiplyScalar(-norm);
 
         const dragon = new THREE.Group();
-
-        const bodyGeo = new THREE.IcosahedronGeometry(0.7, 48);
-        const bodyMat = new THREE.ShaderMaterial({
-          uniforms: { uTime: { value: 0 }, uAmp: { value: 0.25 }, uScroll: { value: 0 } },
-          vertexShader: VERTEX_BODY,
-          fragmentShader: FRAG_BODY,
-          transparent: true,
-        });
-        const body = new THREE.Mesh(bodyGeo, bodyMat);
-
-        const hornGeo = new THREE.ConeGeometry(0.08, 0.15, 6);
-        const hornMat = new THREE.MeshPhysicalMaterial({
-          color: 0xE2E8F0, roughness: 0.9, metalness: 0.0,
-        });
-        const hornL = new THREE.Mesh(hornGeo, hornMat);
-        hornL.position.set(-0.25, 0.7, -0.45);
-        hornL.rotation.x = 0.4;
-        hornL.rotation.z = 0.3;
-        const hornR = new THREE.Mesh(hornGeo, hornMat);
-        hornR.position.set(0.25, 0.7, -0.45);
-        hornR.rotation.x = 0.4;
-        hornR.rotation.z = -0.3;
-        const hornBackL = new THREE.Mesh(hornGeo, hornMat);
-        hornBackL.position.set(-0.15, 0.65, -0.6);
-        hornBackL.rotation.x = 0.8;
-        hornBackL.rotation.z = 0.2;
-        hornBackL.scale.set(0.7, 0.7, 0.7);
-        const hornBackR = new THREE.Mesh(hornGeo, hornMat);
-        hornBackR.position.set(0.15, 0.65, -0.6);
-        hornBackR.rotation.x = 0.8;
-        hornBackR.rotation.z = -0.2;
-        hornBackR.scale.set(0.7, 0.7, 0.7);
-
-        const wings = [];
-        const wingShape = createWingShape(THREE);
-        if (wingShape) {
-          const wingGeo = new THREE.ShapeGeometry(wingShape, 12);
-          const wingMat = new THREE.ShaderMaterial({
-            uniforms: { uTime: { value: 0 }, uWingAmp: { value: 1 }, uScroll: { value: 0 } },
-            vertexShader: VERTEX_WING,
-            fragmentShader: FRAG_WING,
-            transparent: true,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-          });
-          const wingL = new THREE.Mesh(wingGeo, wingMat);
-          wingL.position.set(0.4, 0.1, 0);
-          wingL.rotation.x = -0.1;
-          wingL.rotation.y = 1.2;
-          wingL.rotation.z = 0.1;
-          wingL.scale.set(0.45, 0.45, 0.45);
-
-          const wingR = wingL.clone();
-          wingR.position.x = -0.4;
-          wingR.rotation.y = -1.2;
-          wingR.rotation.z = -0.1;
-
-          wings.push(wingL, wingR);
-        }
-
-        const fins = [];
-        const tailShape = createTailFinShape(THREE);
-        if (tailShape) {
-          const finMat = new THREE.MeshPhysicalMaterial({
-            color: 0xE2E8F0, transparent: true, opacity: 0.4,
-            roughness: 0.8, metalness: 0.0, side: THREE.DoubleSide,
-          });
-          const finGeo = new THREE.ShapeGeometry(tailShape, 8);
-          const finTop = new THREE.Mesh(finGeo, finMat);
-          finTop.position.set(0, 0.3, 0.8);
-          finTop.rotation.x = 0.5;
-          finTop.scale.set(0.35, 0.35, 0.35);
-
-          const finBottom = finTop.clone();
-          finBottom.position.y = -0.3;
-          finBottom.rotation.x = -0.5;
-          finBottom.scale.set(0.35, 0.35, 0.35);
-
-          fins.push(finTop, finBottom);
-        }
-
-        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x0EA5E9 });
-        const eyeGeo = new THREE.SphereGeometry(0.055, 12, 12);
-        const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-        eyeL.position.set(-0.2, 0.4, -0.75);
-        const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-        eyeR.position.set(0.2, 0.4, -0.75);
-
-        const glowMat = new THREE.MeshBasicMaterial({
-          color: 0x0EA5E9, transparent: true, opacity: 0.25,
-        });
-        const glowGeo = new THREE.SphereGeometry(0.11, 12, 12);
-        const glowL = new THREE.Mesh(glowGeo, glowMat);
-        glowL.position.copy(eyeL.position);
-        const glowR = new THREE.Mesh(glowGeo, glowMat);
-        glowR.position.copy(eyeR.position);
-
-        dragon.add(body, hornL, hornR, hornBackL, hornBackR,
-          ...wings, ...fins, eyeL, eyeR, glowL, glowR);
+        dragon.add(model);
+        dragon.rotation.set(DRAGON.baseRotX, DRAGON.baseRotY, 0);
         scene.add(dragon);
 
-        const plasma = new THREE.Color(0x0EA5E9);
-        const particleCount = 180;
+        // Whole-dragon opacity for the choreographed exit / landing fades.
+        // three has no group opacity, so fade every shared material together;
+        // transparent must be on for opacity < 1 to take effect.
+        const dragonMats = Object.values(built.materials);
+        dragonMats.forEach((m) => { m.transparent = true; });
+        const setDragonOpacity = (o) => {
+          const v = clamp01(o);
+          for (let i = 0; i < dragonMats.length; i++) dragonMats[i].opacity = v;
+        };
+
+        // ── Ember particle cloud — warm motes hazing around the dragon,
+        // retuned down so it never competes with the model. ──
+        const ember = new THREE.Color(0xF97316);
+        const particleCount = 120;
         const pPos = new Float32Array(particleCount * 3);
-        const pSizes = new Float32Array(particleCount);
         const pSpeeds = new Float32Array(particleCount);
         for (let i = 0; i < particleCount; i++) {
           const theta = Math.random() * Math.PI * 2;
-          const r = 1 + Math.random() * 3;
+          const r = 1.2 + Math.random() * 3;
           pPos[i * 3] = Math.cos(theta) * r;
-          pPos[i * 3 + 1] = (Math.random() - 0.5) * 4;
+          pPos[i * 3 + 1] = (Math.random() - 0.5) * 4.5;
           pPos[i * 3 + 2] = Math.sin(theta) * r;
-          pSizes[i] = 0.008 + Math.random() * 0.02;
           pSpeeds[i] = 0.02 + Math.random() * 0.04;
         }
         const pGeo = new THREE.BufferGeometry();
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-
         const pMat = new THREE.PointsMaterial({
-          color: plasma, size: 0.025, transparent: true, opacity: 0.35,
-          blending: THREE.AdditiveBlending, depthWrite: false,
-          sizeAttenuation: true,
+          color: ember, size: 0.013, transparent: true, opacity: 0.12,
+          blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
         });
         const particles = new THREE.Points(pGeo, pMat);
-        particles.position.y = 1;
+        particles.position.set(DRAGON.baseX, 0.6, -0.5);
         scene.add(particles);
 
+        // ── Scroll (lerped), pointer parallax, resize + responsive layout. ──
         let scrollTarget = 0;
         let scrollCurrent = 0;
         const handleScroll = () => {
@@ -287,111 +473,204 @@ function Background3D() {
         };
         window.addEventListener('pointermove', handleMouse);
 
+        let layout = WIDE;
+        let isMobile = false;      // ≤640: dragon is hero-only, exits early, no return
+        let deadZoneCleared = false; // one transparent frame flushed on entering the dead zone
         const handleResize = () => {
           const w = window.innerWidth;
           const h = window.innerHeight;
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
+          layout = w < 860 ? NARROW : WIDE;
+          isMobile = w <= 640;
+          deadZoneCleared = false; // re-clear at the new size if still off-stage
         };
         handleResize();
         window.addEventListener('resize', handleResize);
 
-        const clock = new THREE.Clock();
+        // Manual clock (THREE.Clock is deprecated in favour of THREE.Timer).
+        // Mirrors Clock exactly: getDelta() returns seconds since the last call
+        // and accumulates elapsed; startClock() reseats the baseline + resets
+        // elapsed the way Clock.start() does when the scene resumes.
+        let clockOldTime = 0;
+        let clockElapsed = 0;
+        const getDelta = () => {
+          const now = performance.now() / 1000;
+          const diff = now - clockOldTime;
+          clockOldTime = now;
+          clockElapsed += diff;
+          return diff;
+        };
+        const startClock = () => {
+          clockOldTime = performance.now() / 1000;
+          clockElapsed = 0;
+        };
         let running = false;
         let raf = 0;
 
         const frame = () => {
           raf = window.requestAnimationFrame(frame);
-          const dt = clock.getDelta();
-          const elapsed = clock.getElapsedTime();
+          const dt = getDelta();
+          const elapsed = clockElapsed;
 
-          scrollCurrent += (scrollTarget - scrollCurrent) * 0.03;
+          // Lerp the raw scroll → page progress s (0 top … 1 bottom). This is the
+          // same value as App.js's --scroll-progress, and the whole dragon
+          // choreography contract is keyed to it.
+          scrollCurrent += (scrollTarget - scrollCurrent) * 0.045;
+          const s = clamp01(scrollCurrent);
 
-          const s = Math.min(1, scrollCurrent * 1.3);
-          const fadeOut = Math.max(0, 1 - (scrollCurrent - 0.65) * 3.5);
+          const exitEnd = isMobile ? CHOREO.exitEndMobile : CHOREO.exitEnd;
+          const fadeEnd = isMobile ? exitEnd : CHOREO.fadeEnd;
 
-          bodyMat.uniforms.uTime.value = elapsed;
-          bodyMat.uniforms.uScroll.value = s;
-
-          dragon.rotation.y = mouse.x * 0.15 + s * 0.4 + Math.sin(elapsed * 0.12) * 0.08;
-          dragon.rotation.x = -mouse.y * 0.08 + s * 0.12 + Math.sin(elapsed * 0.18) * 0.03;
-          dragon.position.y = Math.sin(elapsed * 0.2) * 0.03 - s * 0.2;
-          dragon.position.z = -s * 0.4;
-
-          const wingSpread = 0.8 + s * 0.3 + Math.sin(elapsed * 0.4) * 0.04;
-          wings.forEach((w, i) => {
-            w.material.uniforms.uTime.value = elapsed;
-            w.material.uniforms.uWingAmp.value = 0.5 + s * 0.5;
-            w.material.uniforms.uScroll.value = s;
-            const dir = i === 0 ? 1 : -1;
-            w.rotation.y = dir * wingSpread;
-            w.rotation.z = dir * 0.08;
-          });
-
-          const eyeBright = 0.4 + s * 0.6;
-          glowL.material.opacity = eyeBright * 0.3;
-          glowR.material.opacity = eyeBright * 0.3;
-          eyeL.material.color.setHSL(0.58, 0.9, 0.5 + eyeBright * 0.3);
-          eyeR.material.color.setHSL(0.58, 0.9, 0.5 + eyeBright * 0.3);
-
-          dragon.children.forEach((child) => {
-            if (child.material && child.material.opacity !== undefined) {
-              child.material.opacity = Math.min(1, fadeOut * 2.5);
+          // ── Phase C: dead zone — the dragon is off-stage and NOT rendered.
+          // Mobile has no return, so everything past its exit stays dead. We flush
+          // ONE transparent frame on entry (to clear the last dragon pixels) then
+          // skip all draw work until the dragon is due back — the perf win.
+          const inDeadZone = s >= exitEnd && (isMobile || s < CHOREO.returnStart);
+          if (inDeadZone) {
+            if (!deadZoneCleared) {
+              dragon.visible = false;
+              particles.visible = false;
+              camera.position.x = mouse.x * 0.12;
+              camera.position.y = 0.5 + mouse.y * 0.08;
+              camera.lookAt(layout.look, 0.05, 0);
+              renderer.render(scene, camera);
+              deadZoneCleared = true;
             }
-          });
-          dragon.scale.setScalar(0.6 + fadeOut * 0.4);
-
-          const pos = particles.geometry.attributes.position.array;
-          for (let i = 0; i < particleCount; i++) {
-            pos[i * 3 + 1] += pSpeeds[i] * dt * 0.3;
-            pos[i * 3] += Math.sin(elapsed * 0.5 + i) * dt * 0.02;
-            pos[i * 3 + 2] += Math.cos(elapsed * 0.3 + i * 0.5) * dt * 0.02;
-            if (pos[i * 3 + 1] > 3) {
-              pos[i * 3 + 1] = -2;
-              const theta = Math.random() * Math.PI * 2;
-              const r = 1 + Math.random() * 3;
-              pos[i * 3] = Math.cos(theta) * r;
-              pos[i * 3 + 2] = Math.sin(theta) * r;
-            }
+            return;
           }
-          particles.geometry.attributes.position.needsUpdate = true;
+          deadZoneCleared = false;
+          dragon.visible = true;
 
-          particles.material.opacity = 0.1 + fadeOut * 0.3;
+          // Wing flap (~0.8Hz, downstroke-biased) with choreographed amplitude —
+          // it eases to 0 on the landing (wings folding). Left wing mirrored.
+          const flapT = elapsed * Math.PI * 2 * 0.8;
+          const flap = Math.sin(flapT) - 0.22 * Math.sin(2 * flapT);
+          const bob = Math.sin(elapsed * 0.5) * 0.07; // gentle idle bob
+          let flapAmp = 0.3;
+          let particlesActive = false;
+          let particleOpacity = 0;
 
-          camera.position.x = mouse.x * 0.12 + dragon.position.x * 0.1;
-          camera.position.y = 0.6 + mouse.y * 0.08 + dragon.position.y * 0.1;
-          camera.lookAt(dragon.position.x * 0.3, 0, 0);
+          if (s <= CHOREO.presenceEnd) {
+            // ── Phase A: full hero presence — right third, idle flap. ──
+            setDragonOpacity(1);
+            dragon.position.x = layout.baseX + mouse.x * 0.05;
+            dragon.position.y = layout.baseY + bob;
+            dragon.position.z = 0;
+            dragon.rotation.y = DRAGON.baseRotY + mouse.x * 0.12 + Math.sin(elapsed * 0.16) * 0.05;
+            dragon.rotation.z = Math.sin(elapsed * 0.22) * 0.02;
+            dragon.rotation.x = DRAGON.baseRotX - mouse.y * 0.05 + Math.sin(elapsed * 0.19) * 0.02;
+            dragon.scale.setScalar(layout.scale);
+            particlesActive = true;
+            particleOpacity = 0.12;
+          } else if (s < exitEnd) {
+            // ── Phase B: banked exit stage-right — opacity 1→0, drift + recede,
+            // fully off-canvas by exitEnd; no partial silhouette after. ──
+            const ex = smooth01((s - CHOREO.presenceEnd) / (exitEnd - CHOREO.presenceEnd));
+            setDragonOpacity(1 - smooth01((s - CHOREO.presenceEnd) / (fadeEnd - CHOREO.presenceEnd)));
+            dragon.position.x = layout.baseX + ex * 4.6 + mouse.x * 0.05;
+            dragon.position.y = layout.baseY + bob - ex * 1.35;
+            dragon.position.z = -ex * 2.4;
+            dragon.rotation.y = DRAGON.baseRotY + mouse.x * 0.12 + ex * 0.72;
+            dragon.rotation.z = -ex * 0.5; // bank away as it peels off
+            dragon.rotation.x = DRAGON.baseRotX + ex * 0.16;
+            dragon.scale.setScalar(layout.scale * (1 - ex * 0.12));
+            particlesActive = true;
+            particleOpacity = 0.12 * (1 - ex);
+          } else {
+            // ── Phase D: re-entry from upper-right → descending glide → composed
+            // perched pose filling Contact's right half by ~0.95; flap → 0. ──
+            const re = smooth01((s - CHOREO.returnStart) / (CHOREO.landBy - CHOREO.returnStart));
+            setDragonOpacity(clamp01((s - CHOREO.returnStart) / 0.03)); // fade in over first ~0.03
+            const landX = layout.baseX - 0.35; // seats the perch in the right half
+            const landY = layout.baseY - 0.1;
+            dragon.position.x = landX + (1 - re) * 1.9 + mouse.x * 0.04;
+            dragon.position.y = landY + (1 - re) * 2.5 + bob * (1 - re);
+            dragon.position.z = -(1 - re) * 1.9;
+            dragon.rotation.y = DRAGON.baseRotY - re * 0.14 + mouse.x * 0.05; // eyes toward the copy
+            dragon.rotation.z = (1 - re) * 0.3; // banked on descent → level on landing
+            dragon.rotation.x = DRAGON.baseRotX + (1 - re) * 0.12;
+            dragon.scale.setScalar(layout.scale * (0.92 + re * 0.08));
+            flapAmp = 0.3 * (1 - re); // wings fold as it perches
+          }
+
+          const wz = built.wingBaseZ + flap * flapAmp;
+          built.wingR.rotation.z = wz;
+          built.wingL.rotation.z = -wz;
+          built.head.rotation.z = Math.sin(elapsed * 0.5) * 0.03;
+
+          // Ember motes — only while the dragon is in / peeling off the hero.
+          particles.visible = particlesActive;
+          if (particlesActive) {
+            const pos = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+              pos[i * 3 + 1] += pSpeeds[i] * dt * 0.3;
+              pos[i * 3] += Math.sin(elapsed * 0.5 + i) * dt * 0.02;
+              pos[i * 3 + 2] += Math.cos(elapsed * 0.3 + i * 0.5) * dt * 0.02;
+              if (pos[i * 3 + 1] > 3) {
+                pos[i * 3 + 1] = -2.2;
+                const theta = Math.random() * Math.PI * 2;
+                const r = 1.2 + Math.random() * 3;
+                pos[i * 3] = Math.cos(theta) * r;
+                pos[i * 3 + 2] = Math.sin(theta) * r;
+              }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            particles.material.opacity = particleOpacity;
+          }
+
+          // Pointer parallax on the camera; look slightly left of the dragon so it
+          // renders in the right third without perspective skew.
+          camera.position.x = mouse.x * 0.12;
+          camera.position.y = 0.5 + mouse.y * 0.08;
+          camera.lookAt(layout.look, 0.05, 0);
 
           renderer.render(scene, camera);
         };
 
-        const start = () => { if (running) return; running = true; clock.start(); frame(); };
+        const start = () => { if (running) return; running = true; startClock(); frame(); };
         const stop = () => { running = false; window.cancelAnimationFrame(raf); };
 
+        // On-screen gate + tab-visibility gate + one-shot pagehide stop.
         const io = new IntersectionObserver(
           ([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0 }
         );
         io.observe(canvas);
-        document.addEventListener('visibilitychange', () => {
-          document.hidden ? stop() : start();
-        });
+        const handleVisibility = () => { document.hidden ? stop() : start(); };
+        document.addEventListener('visibilitychange', handleVisibility);
         window.addEventListener('pagehide', stop, { once: true });
 
+        // ── Full teardown — listeners, observers, every geometry/material/
+        // texture, particle buffers, renderer. ──
         dispose = () => {
-          stop(); io.disconnect();
+          document.documentElement.classList.remove('webgl-live');
+          stop();
+          io.disconnect();
           window.removeEventListener('pointermove', handleMouse);
           window.removeEventListener('resize', handleResize);
           window.removeEventListener('scroll', handleScroll);
-          bodyGeo.dispose(); bodyMat.dispose();
-          wings.forEach((w) => { w.geometry.dispose(); w.material.dispose(); });
-          pGeo.dispose(); pMat.dispose();
+          document.removeEventListener('visibilitychange', handleVisibility);
+
+          built.geometries.forEach((g) => g.dispose());
+          Object.values(built.materials).forEach((m) => m.dispose());
+          gradient.dispose();
+          pGeo.dispose();
+          pMat.dispose();
           renderer.dispose();
         };
-      } catch { /* fail silently */ }
+
+        // Real render signal: the scene (renderer + built model) is fully
+        // constructed and about to run, so hide the fallback poster. Reached only
+        // after canRun3D() passed — never on the fallback paths — and removed
+        // again in dispose() above.
+        document.documentElement.classList.add('webgl-live');
+
+        if (!document.hidden) start();
+      } catch { /* fail silently — no 3D, page unaffected */ }
     }, 200);
 
-    return () => { clearTimeout(timeoutId); dispose(); };
+    return () => { cancelled = true; clearTimeout(timeoutId); dispose(); };
   }, []);
 
   return <canvas ref={canvasRef} aria-hidden="true" className="bg-3d" />;

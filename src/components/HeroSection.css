@@ -1,29 +1,40 @@
-.hero__avatar,
-.hero__eyebrow,
-.hero__name,
-.hero__title,
-.hero__description,
-.hero__actions,
-.hero__meta,
-.hero__stats {
+/* Load reveal is driven by GSAP (see HeroSection.js): followers start hidden
+   and the name is held invisible until it is split. Gated behind html.has-js so
+   that with JS disabled everything renders fully visible (no permanent hide). */
+html.has-js .hero__eyebrow,
+html.has-js .hero__title,
+html.has-js .hero__description,
+html.has-js .hero__actions,
+html.has-js .hero__meta,
+html.has-js .hero__stats {
   opacity: 0;
   transform: translateY(var(--d-rise));
-  animation: reveal var(--t-base) var(--ease-out) forwards;
 }
 
-.hero__avatar,
-.hero__eyebrow { animation-delay: 0ms; }
-.hero__name { animation-delay: 80ms; }
-.hero__title { animation-delay: 160ms; }
-.hero__description { animation-delay: 240ms; }
-.hero__actions,
-.hero__meta,
-.hero__stats { animation-delay: 320ms; }
+html.has-js .hero__name {
+  visibility: hidden;
+}
 
-@keyframes reveal {
-  to {
+/* SplitText characters — inline-block so they can transform; GPU hint. */
+.hero__char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* Reduced motion → no reveal, final state visible immediately (no flash). */
+@media (prefers-reduced-motion: reduce) {
+  html.has-js .hero__eyebrow,
+  html.has-js .hero__title,
+  html.has-js .hero__description,
+  html.has-js .hero__actions,
+  html.has-js .hero__meta,
+  html.has-js .hero__stats {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
+  }
+
+  html.has-js .hero__name {
+    visibility: visible;
   }
 }
 
@@ -32,37 +43,10 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  padding-top: 40px;
 }
 
-/* Eyebrow with sage status dot */
-.hero__avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  border: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex: none;
-}
-
-.hero__avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero__avatar-initials {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
+/* Compact status eyebrow with sky status dot */
 .hero__eyebrow {
   display: inline-flex;
   align-items: center;
@@ -72,38 +56,39 @@
 .hero__dot {
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--accent);
   flex: none;
 }
 
-/* Name — dominant display headline */
+/* Name — the single dominant typographic moment. Oversized editorial serif. */
 .hero__name {
-  margin: 22px 0 0;
+  margin: 28px 0 0;
   font-family: var(--font-display);
-  font-size: clamp(3.5rem, 9vw, 6.5rem);
-  font-weight: 550;
-  line-height: 1.02;
-  letter-spacing: -0.03em;
+  font-size: clamp(3.25rem, 14vw, 11rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
   color: var(--text-1);
 }
 
-/* Supporting title line */
+/* Supporting title line — first step down */
 .hero__title {
-  margin: 20px 0 0;
-  max-width: 34rem;
-  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
-  font-weight: 500;
-  line-height: 1.5;
-  color: var(--text-2);
+  margin: 32px 0 0;
+  max-width: 34ch;
+  font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+  font-weight: 400;
+  font-family: var(--font-display);
+  line-height: 1.4;
+  color: var(--text-1);
 }
 
-/* Secondary paragraph */
+/* Secondary paragraph — steps down further */
 .hero__description {
-  margin: 18px 0 0;
-  max-width: 40rem;
+  margin: 16px 0 0;
+  max-width: 56ch;
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text-2);
 }
 
@@ -115,12 +100,11 @@
   margin-top: 34px;
 }
 
-/* Single plain metadata line */
+/* Single plain metadata line — shared meta tier */
 .hero__meta {
   margin: 26px 0 0;
-  font-size: 14px;
-  font-weight: 550;
-  line-height: 1.5;
+  font: var(--type-meta);
+  letter-spacing: 0.01em;
   color: var(--text-3);
 }
 
@@ -128,7 +112,7 @@
 .hero__stats {
   width: 100%;
   margin: 56px 0 0;
-  padding: 28px 0;
+  padding: var(--space-group) 0;
   border-top: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
   display: grid;
@@ -157,9 +141,8 @@
 
 .hero__stat-label {
   margin: 10px 0 0;
-  font-size: 13px;
-  font-weight: 550;
-  line-height: 1.45;
+  font: var(--type-meta);
+  letter-spacing: 0.01em;
   color: var(--text-3);
 }
 

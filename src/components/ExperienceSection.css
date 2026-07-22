@@ -1,24 +1,18 @@
-/* Experience — one editorial list inside a single matte card, divided by rules. */
+/* Experience — bare editorial list on the canvas, divided by hairline rules. */
 
 .xp-list {
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  border-top: 1px solid var(--border-subtle);
   list-style: none;
   margin: 0;
-  padding: 8px 32px;
+  padding: 0;
 }
 
 .xp-row {
+  border-bottom: 1px solid var(--border-subtle);
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 190px 1fr;
   gap: 40px;
-  padding: 36px 0;
-}
-
-.xp-row + .xp-row {
-  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-group) 0;
 }
 
 /* Left column — period + location */
@@ -36,10 +30,10 @@
 }
 
 .xp-location {
-  color: var(--text-3);
-  font-size: 13px;
-  font-weight: 500;
   margin: 6px 0 0;
+  font: var(--type-meta);
+  letter-spacing: 0.01em;
+  color: var(--text-3);
 }
 
 /* Right column — role detail */
@@ -82,7 +76,7 @@
 }
 
 .xp-highlight {
-  color: var(--text-3);
+  color: var(--text-2);
   font-size: 14px;
   line-height: 1.6;
   font-variant-numeric: tabular-nums;

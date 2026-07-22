@@ -1,0 +1,258 @@
+/* =============================================================================
+   AuroraThread — ambient scroll-driven "magic tunnel" spine
+   -----------------------------------------------------------------------------
+   Aurora palette is locked to the Night Fury red/ember family around the accent
+   #EF4444 (NO cyan / NO blue — plasma-blast red):
+       #F87171 (soft red)  ->  #EF4444 (accent red)  ->  #DC2626 (deep red)
+   Calm, atmospheric, low intensity — this sits BEHIND editorial content on the
+   #0A0A0A canvas, it is not a laser.
+
+   Z-INDEX DECISION
+   ----------------
+   The app's stacking context is #root (isolation: isolate). Inside it:
+       .bg-3d            z-index: 0   (fixed radial canvas — background art)
+       .app-dragon-poster z-index: 0  (fixed poster art, rendered FIRST in App.js)
+       .app-main / footer z-index: 1   (content)
+       .site-header      z-index: 50  (content chrome)
+   The brief asks for a layer ABOVE the background art but BELOW content. There
+   is no integer strictly between 0 and 1, so this layer uses `z-index: 0`:
+     - It is ALWAYS beneath every z-index:1+ content element (guaranteed by the
+       stacking algorithm, independent of DOM order).
+     - Among the other z-index:0 layers it paints by source order. App.js renders
+       .app-dragon-poster then <Background3D/> first, so mounting <AuroraThread/>
+       after them (its natural decorative slot) makes it paint ON TOP of the
+       background art. That is the intended sandwich: bg art < aurora < content.
+   ========================================================================== */
+
+.aurora-thread {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* above bg art (source order), below all z-index:1 content */
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint; /* isolate paint; this layer never affects layout */
+
+  /* Tunable geometry (overridden at the mobile breakpoint) */
+  --aurora-beam-width: 180px; /* horizontal falloff width of the soft glow */
+  --aurora-orb-size: 40px;    /* traveling ring diameter (28-44px range) */
+}
+
+/* -----------------------------------------------------------------------------
+   RIBBON — the vertical aurora spine
+   The element itself is the wide, soft glow (~180px horizontal falloff); its
+   ::before is the crisp ~2px luminous core. Only background-position drifts
+   (transform/opacity/background-position only — no layout properties).
+   -------------------------------------------------------------------------- */
+.aurora-thread__ribbon {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--aurora-beam-width);
+  transform: translateX(-50%);
+
+  /* Vertical flowing aurora gradient, tiled so the drift loops without a
+     visible seam (starts and ends on #F87171 => the join is invisible). */
+  background-image: linear-gradient(
+    180deg,
+    #f87171 0%,
+    #ef4444 25%,
+    #dc2626 50%,
+    #ef4444 75%,
+    #f87171 100%
+  );
+  background-repeat: repeat-y;
+  background-size: 100% 55vh; /* one seamless tile */
+  background-position: 0 0;
+
+  /* Horizontal falloff -> the fill reads as a soft beam, not a rectangle. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 34%,
+    #000 50%,
+    rgba(0, 0, 0, 0.55) 66%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 34%,
+    #000 50%,
+    rgba(0, 0, 0, 0.55) 66%,
+    transparent 100%
+  );
+
+  /* Base glow ~0.1 (atmosphere); --beam-glow swells it ×2 across the marquee
+     "runway" into the tunnel entry, then decays back toward Contact. Driven by
+     App.js's existing scroll rAF — no animation fighting the transition. */
+  opacity: calc(0.1 * var(--beam-glow, 1));
+  transition: opacity 0.45s ease;
+  will-change: background-position, opacity;
+  animation: aurora-ribbon-drift 26s linear infinite;
+}
+
+/* Crisp luminous core line down the exact center. */
+.aurora-thread__ribbon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+
+  background-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #f87171 10%,
+    #ef4444 38%,
+    #dc2626 60%,
+    #ef4444 82%,
+    transparent 100%
+  );
+  background-repeat: repeat-y;
+  background-size: 100% 55vh;
+  background-position: 0 0;
+
+  opacity: calc(0.5 * var(--beam-glow, 1)); /* core tracks the beam swell (≤1) */
+  transition: opacity 0.45s ease;
+  animation: aurora-ribbon-drift 26s linear infinite;
+}
+
+/* -----------------------------------------------------------------------------
+   ORB — a glowing ring that rides the thread, tracking scroll progress.
+   Positioned by TRANSFORM (not top) so it never triggers layout:
+     translate3d(-50%, <scroll offset>, 0)
+   The -50% X centers the box on the spine; the Y is driven straight from
+   --scroll-progress (0..1), which App.js updates per rAF scroll frame.
+   No transition on the transform -> exact, lag-free tracking (a transition
+   would fight the already frame-aligned var updates).
+   Pulse (scale) lives on the pseudo-elements so it never fights the position
+   transform on this element.
+   -------------------------------------------------------------------------- */
+.aurora-thread__orb {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: var(--aurora-orb-size);
+  height: var(--aurora-orb-size);
+  transform: translate3d(
+    -50%,
+    calc(var(--scroll-progress, 0) * (100vh - var(--aurora-orb-size))),
+    0
+  );
+  /* Per-fold intensity: ~0.85 (native) in section seams, ~0.15 dimmed inside a
+     content fold, 0 (hidden) across the pinned Journeys tunnel. --orb-opacity is
+     a 0..1 multiplier on the ring's native 0.85; App.js's scroll rAF sets it. */
+  opacity: var(--orb-opacity, 0.85);
+  transition: opacity 0.4s ease;
+  will-change: transform, opacity;
+}
+
+/* Soft outer glow halo (painted first -> sits behind the ring). */
+.aurora-thread__orb::before {
+  content: '';
+  position: absolute;
+  inset: -45%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(239, 68, 68, 0.22) 0%,
+    rgba(220, 38, 38, 0.1) 45%,
+    transparent 70%
+  ); /* peak alpha 0.22 (<= 0.25) */
+  animation: aurora-orb-pulse 3s ease-in-out infinite;
+}
+
+/* Crisp ~2px aurora-gradient ring (conic fill masked into a donut). */
+.aurora-thread__orb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 140deg,
+    #f87171,
+    #ef4444,
+    #dc2626,
+    #ef4444,
+    #f87171
+  );
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2px),
+    #000 calc(100% - 2px)
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2px),
+    #000 calc(100% - 2px)
+  );
+  opacity: 0.85;
+  animation: aurora-orb-pulse 3s ease-in-out infinite;
+}
+
+/* -----------------------------------------------------------------------------
+   Keyframes — transform / background-position only.
+   -------------------------------------------------------------------------- */
+@keyframes aurora-ribbon-drift {
+  to {
+    background-position: 0 55vh; /* one full tile -> seamless loop */
+  }
+}
+
+@keyframes aurora-orb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   MOBILE (<= 640px): ONE ambient element only. Per the dosage brief the orb is
+   hidden entirely and the beam runs at HALF glow — on a 390px canvas the ambient
+   layer must not compete with the narrow content column.
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .aurora-thread {
+    --aurora-beam-width: 80px;
+  }
+
+  .aurora-thread__ribbon {
+    opacity: calc(0.05 * var(--beam-glow, 1)); /* half glow */
+  }
+
+  .aurora-thread__ribbon::before {
+    opacity: calc(0.25 * var(--beam-glow, 1));
+  }
+
+  .aurora-thread__orb {
+    display: none; /* hidden on mobile — beam is the single ambient element */
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   REDUCED MOTION: no drift, no pulse, no scroll-linked movement.
+   The orb tracks scroll via a CSS var (not an @keyframes animation), so the
+   global reduce rule in index.css cannot stop it -> hide it explicitly. The
+   ribbon stays as a static, dimmer gradient. Content is unaffected either way.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-thread__ribbon {
+    animation: none;
+    opacity: 0.07;
+  }
+
+  .aurora-thread__ribbon::before {
+    animation: none;
+    opacity: 0.32;
+  }
+
+  .aurora-thread__orb {
+    display: none; /* remove scroll-linked motion entirely */
+  }
+}

@@ -1,0 +1,84 @@
+/* JourneyTunnel — full-bleed scroll-scrubbed 3D scene.
+   Full-bleed break-out mirrors the marquee: the section content column is
+   centered (margin: 0 auto), so calc(50% - 50vw) escapes to viewport width.
+   The container is the ScrollTrigger pin target; it must own a real height in
+   normal flow so the pin spacer reserves the right space. */
+.journey-tunnel {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  height: 100vh;
+  min-height: 620px;
+  overflow: hidden;
+}
+
+.journey-tunnel__canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Live caption — bottom-left of the scene. Reads as premium chrome; also a
+   real accessible text node for the current front photo. */
+.journey-tunnel__caption {
+  position: absolute;
+  left: max(24px, calc(50vw - 560px));
+  bottom: clamp(28px, 6vh, 64px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 1px 20px rgba(10, 10, 10, 0.9);
+}
+
+.journey-tunnel__index {
+  color: var(--accent, #ef4444);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+}
+
+.journey-tunnel__place {
+  color: var(--text-1, #f2f2f0);
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.journey-tunnel__tag {
+  color: var(--text-2, rgba(255, 255, 255, 0.56));
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Screen-reader-only ring index — the WebGL canvas is aria-hidden. */
+.journey-tunnel__sr-list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Belt-and-braces: if a reduced-motion user ever reaches this component,
+   collapse the tall pinned box so it never eats the viewport. */
+@media (prefers-reduced-motion: reduce) {
+  .journey-tunnel {
+    height: auto;
+    min-height: 0;
+  }
+}
